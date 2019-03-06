@@ -198,6 +198,26 @@ class PWAMP_TranscodingCommon
 		}
 	}
 
+	protected function minify_css($css, $id = '')
+	{
+		$css = !empty($id) ? $id . '{' . $css . '}' : $css;
+
+		$css = preg_replace('/\bamp-(audio|iframe|img|video)\b/i', '${1}', $css);
+		$css = preg_replace('/\b(audio|iframe|img|video)\b/i', 'amp-${1}', $css);
+
+		$css = preg_replace('/\/\*[^*]*\*+([^\/][^*]*\*+)*\//', '', $css);
+		$css = preg_replace('/\s*!important/i', '', $css);
+		$css = str_replace(array("\r\n", "\r", "\n", "\t", '  ', '   ', '    '), '', $css);
+		$css = str_replace(array(' {', '{ ', ': ', ', ', '; ', ' }', ';}'), array('{', '{', ':', ',', ';', '}', '}'), $css);
+
+		if ( preg_match('/{}$/im', $css) )
+		{
+			return;
+		}
+
+		$this->style .= $css;
+	}
+
 
 	protected function update_image(&$page)
 	{
@@ -263,13 +283,6 @@ class PWAMP_TranscodingCommon
 		$page = preg_replace('/<\/body>/i', $serviceworker, $page, 1);
 
 		$page = preg_replace('/<icon class="([^"]+)"><\/icon>/i', '<div class="${1}"></div>', $page);
-
-
-		/*
-			<button></button>
-		*/
-		$page = preg_replace('/<button\b([^>]*)>/i', '<a${1}>', $page);
-		$page = preg_replace('/<\/button>/i', '</a>', $page);
 
 
 		/*
@@ -376,7 +389,7 @@ class PWAMP_TranscodingCommon
 		$page = preg_replace('/<img\b([^>]*) src=(("[^"]+(data:image\/gif;base64,[^"]+)")|(\'[^\']+(data:image\/gif;base64,[^\']+)\'))([^>]*)\s?\/?>/iU', '<img${1} src="${4}${6}"${7} />', $page);
 
 		// The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'?
-		$page = preg_replace('/<img\b([^>]*)\s*?\/?>/iU', '<div style="all:revert"><amp-img${1}' . ( !preg_match('/ layout=(("[^"]*")|(\'[^\']*\'))/i', '${1}') ? ' layout="intrinsic"' : '' ) . ' /></div>', $page);
+		$page = preg_replace('/<img\b([^>]*)\s*?\/?>/iU', '<div style="all:revert;display:inline"><amp-img${1}' . ( !preg_match('/ layout=(("[^"]*")|(\'[^\']*\'))/i', '${1}') ? ' layout="intrinsic"' : '' ) . ' /></div>', $page);
 
 		// The attribute 'align' may not appear in tag 'amp-img'.
 		$page = preg_replace('/<amp-img\b([^>]*) align=(("[^"]*")|(\'[^\']*\'))([^>]*)\s?\/?>/iU', '<amp-img${1}${5} />', $page);
