@@ -5,7 +5,7 @@ Tags: amp, pwa, awd, rwd, mobile, accelerated mobile pages, progressive web apps
 Requires at least: 4.7
 Tested up to: 5.1
 Requires PHP: 5.2.4
-Stable tag: 2.3.0
+Stable tag: 2.4.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -29,6 +29,10 @@ Enter "https://yoursite.com/?amp" in your web browser address bar.
 
 Enter "https://yoursite.com/?desktop" in your web browser address bar.
 
+== Download ==
+1. WordPress Plugins Libraries: https://wordpress.org/plugins/pwamp/
+2. GitHub: https://github.com/rickey29/wordpress-pwamp
+
 == Demo sites ==
 1. https://wordpress-pwamp.flexplat.com/?amp
 
@@ -37,16 +41,17 @@ Enter "https://yoursite.com/?desktop" in your web browser address bar.
 
 == Changelog ==
 
+= 2.4.0 =
+(Sun., Mar. 10, 2019)
+* new feature: support more web site(s)
+
 = 2.3.0 =
 (Mon., Mar. 04, 2019)
-* new feature: support Virtue theme
+* new feature: support more theme(s)
 
 = 2.2.0 =
 (Tue., Feb. 26, 2019)
-* new feature: support https://www.dentist-manila.com/
-* new feature: support https://dentist-asia.com/
-* new feature: support https://dental-implants-asia.com/
-* new feature: support https://simplyintense.com/
+* new feature: support more web site(s)
 
 = 2.1.0 =
 (Sun., Jan. 27, 2019)
