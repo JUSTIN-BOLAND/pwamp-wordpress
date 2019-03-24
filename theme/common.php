@@ -231,20 +231,20 @@ class PWAMP_TranscodingCommon
 			if ( preg_match('/^https?:\/\//im', $key) )
 			{
 				$pattern = str_replace(array('?', '(', ')', 'https://www.', 'https://', 'http://', '/', '.'), array('\?', '\(', '\)', 'https://', 'http://', '(https?:)?//(www.)?', '\/', '\.'), $key);
-				$pattern = '/<img\b([^>]*)(\s?\b(data-)?src\s*=\s*("|\')' . $pattern . '("|\'))([^>]*)\s*?\/?>/iU';
-				$replacement = !empty($value) ? '<img${1}${2}' . $value . '${8} />' : '';
+				$pattern = '/<img\b([^>]*)(\s?\b(data-(lazy-)?)?src\s*=\s*("|\')' . $pattern . '("|\'))([^>]*)\s*?\/?>/iU';
+				$replacement = !empty($value) ? '<img${1}${2}' . $value . '${9} />' : '';
 				$page = preg_replace($pattern, $replacement, $page);
 			}
 			else
 			{
 				$pattern = str_replace(array('?', '(', ')', '/', '.'), array('\?', '\(', '\)', '\/', '\.'), $key);
-				$pattern = '/<img\b([^>]*)(\s?\b(data-)?src\s*=\s*("|\')' . $pattern . '("|\'))([^>]*)\s*?\/?>/iU';
-				$replacement = !empty($value) ? '<img${1}${2}' . $value . '${6} />' : '';
+				$pattern = '/<img\b([^>]*)(\s?\b(data-(lazy-)?)?src\s*=\s*("|\')' . $pattern . '("|\'))([^>]*)\s*?\/?>/iU';
+				$replacement = !empty($value) ? '<img${1}${2}' . $value . '${7} />' : '';
 				$page = preg_replace($pattern, $replacement, $page);
 
 				$pattern = str_replace(array('?', '(', ')', 'https://www.', 'https://', 'http://', '/', '.'), array('\?', '\(', '\)', 'https://', 'http://', '(https?:)?//(www.)?', '\/', '\.'), $this->home_url . $key);
-				$pattern = '/<img\b([^>]*)(\s?\b(data-)?src\s*=\s*("|\')' . $pattern . '("|\'))([^>]*)\s*?\/?>/iU';
-				$replacement = !empty($value) ? '<img${1}${2}' . $value . '${8} />' : '';
+				$pattern = '/<img\b([^>]*)(\s?\b(data-(lazy-)?)?src\s*=\s*("|\')' . $pattern . '("|\'))([^>]*)\s*?\/?>/iU';
+				$replacement = !empty($value) ? '<img${1}${2}' . $value . '${9} />' : '';
 				$page = preg_replace($pattern, $replacement, $page);
 			}
 		}
@@ -274,7 +274,7 @@ class PWAMP_TranscodingCommon
 			<area />
 		*/
 		// The tag 'area' is disallowed.
-		$page = preg_replace('/<area\b([^>]*)\s?\/?>/iU', '', $page);
+		$page = preg_replace('/<area\b([^>]*)\s*?\/?>/iU', '', $page);
 
 
 		// The tag 'audio' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-audio'?
@@ -308,10 +308,17 @@ class PWAMP_TranscodingCommon
 
 
 		/*
+			<canvas></canvas>
+		*/
+		// The tag 'canvas' is disallowed.
+		$page = preg_replace('/<canvas\b[^>]*>.*<\/canvas>/isU', '', $page);
+
+
+		/*
 			<col />
 		*/
 		// The attribute 'width' may not appear in tag 'col'.
-		$page = preg_replace('/<col\b([^>]*) width=(("[^"]*")|(\'[^\']*\'))([^>]*)\s?\/?>/iU', '<col${1}${5} />', $page);
+		$page = preg_replace('/<col\b([^>]*) width=(("[^"]*")|(\'[^\']*\'))([^>]*)\s*?\/?>/iU', '<col${1}${5} />', $page);
 
 
 		/*
@@ -320,12 +327,14 @@ class PWAMP_TranscodingCommon
 		// The attribute 'name' may not appear in tag 'div'.
 		$page = preg_replace('/<div\b([^>]*) name=(("[^"]*")|(\'[^\']*\'))([^>]*)\s*?>/iU', '<div${1}${5}>', $page);
 
+		// The attribute 'target' may not appear in tag 'div'.
+		$page = preg_replace('/<div\b([^>]*) target=(("[^"]*")|(\'[^\']*\'))([^>]*)\s*?>/iU', '<div${1}${5}>', $page);
 
 		/*
 			<embed />
 		*/
 		// The tag 'embed' is disallowed.
-		$page = preg_replace('/<embed\b([^>]*)\s?\/?>/iU', '', $page);
+		$page = preg_replace('/<embed\b([^>]*)\s*?\/?>/iU', '', $page);
 
 
 		/*
@@ -391,6 +400,8 @@ class PWAMP_TranscodingCommon
 		/*
 			<iframe></iframe>
 		*/
+		$page = preg_replace('/<iframe\b([^>]*) src=(("[^"]*")|(\'[^\']*\'))([^>]*) data-lazy-src=(("([^"]*)")|(\'([^\']*)\'))([^>]*)\s*?\/?>/iU', '<iframe${1} src="${8}${10}"${5}${11} />', $page);
+
 		// The tag 'iframe' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-iframe'?
 		$page = preg_replace('/<iframe\b/i', '<amp-iframe', $page);
 
@@ -407,39 +418,40 @@ class PWAMP_TranscodingCommon
 		$page = preg_replace('/<amp-iframe\b([^>]*) frameborder=(("no")|(\'no\'))([^>]*)>/i', '<amp-iframe${1} frameborder="0"${5}>', $page);
 
 		// The attribute 'mozallowfullscreen' may not appear in tag 'amp-iframe'.
-		$page = preg_replace('/<amp-iframe\b([^>]*) mozallowfullscreen(=(("[^"]*")|(\'[^\']*\')))?([^>]*)\s*?>/iU', '<amp-iframe${1}${6}>', $page);
+		$page = preg_replace('/<amp-iframe\b([^>]*) mozallowfullscreen\b(=(("[^"]*")|(\'[^\']*\')))?([^>]*)\s*?>/iU', '<amp-iframe${1}${6}>', $page);
 
 		// The attribute 'name' may not appear in tag 'amp-iframe'.
 		$page = preg_replace('/<amp-iframe\b([^>]*) name=(("[^"]*")|(\'[^\']*\'))([^>]*)\s*?>/iU', '<amp-iframe${1}${5}>', $page);
 
 		// The attribute 'webkitallowfullscreen' may not appear in tag 'amp-iframe'.
-		$page = preg_replace('/<amp-iframe\b([^>]*) webkitallowfullscreen(=(("[^"]*")|(\'[^\']*\')))?([^>]*)\s*?>/iU', '<amp-iframe${1}${6}>', $page);
+		$page = preg_replace('/<amp-iframe\b([^>]*) webkitallowfullscreen\b(=(("[^"]*")|(\'[^\']*\')))?([^>]*)\s*?>/iU', '<amp-iframe${1}${6}>', $page);
 
 
 		/*
 			<img/>
 		*/
-		$page = preg_replace('/<img\b([^>]*) src=(("\/?")|(\'\/?\'))([^>]*)\s?\/?>/iU', '', $page);
+		$page = preg_replace('/<img\b([^>]*) src=(("\/?")|(\'\/?\'))([^>]*)\s*?\/?>/iU', '', $page);
 
-		$page = preg_replace('/<img\b([^>]*) src=(("[^"]+(data:image\/gif;base64,[^"]+)")|(\'[^\']+(data:image\/gif;base64,[^\']+)\'))([^>]*)\s?\/?>/iU', '<img${1} src="${4}${6}"${7} />', $page);
-		$page = preg_replace('/<img\b([^>]*) src=(("\/\/([^"]+)")|(\'\/\/([^\']+)\'))([^>]*)\s?\/?>/iU', '<img${1} src="https://${4}${6}"${7} />', $page);
+		$page = preg_replace('/<img\b([^>]*) src=(("[^"]*")|(\'[^\']*\'))([^>]*) data-lazy-src=(("([^"]*)")|(\'([^\']*)\'))([^>]*)\s*?\/?>/iU', '<img${1} src="${8}${10}"${5}${11} />', $page);
+		$page = preg_replace('/<img\b([^>]*) src=(("[^"]+(data:image\/gif;base64,[^"]+)")|(\'[^\']+(data:image\/gif;base64,[^\']+)\'))([^>]*)\s*?\/?>/iU', '<img${1} src="${4}${6}"${7} />', $page);
+		$page = preg_replace('/<img\b([^>]*) src=(("\/\/([^"]+)")|(\'\/\/([^\']+)\'))([^>]*)\s*?\/?>/iU', '<img${1} src="https://${4}${6}"${7} />', $page);
 
-		$page = preg_replace('/<img\b([^>]*) width="100%"([^>]*)\s?\/?>/iU', '<img${1}${2} />', $page);
+		$page = preg_replace('/<img\b([^>]*) width="100%"([^>]*)\s*?\/?>/iU', '<img${1}${2} />', $page);
 
 		// The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'?
 		$page = preg_replace('/<img\b([^>]*)\s*?\/?>/iU', '<div style="all:revert;display:inline"><amp-img${1}' . ( !preg_match('/ layout=(("[^"]*")|(\'[^\']*\'))/i', '${1}') ? ' layout="intrinsic"' : '' ) . ' /></div>', $page);
 
 		// The attribute 'align' may not appear in tag 'amp-img'.
-		$page = preg_replace('/<amp-img\b([^>]*) align=(("[^"]*")|(\'[^\']*\'))([^>]*)\s?\/?>/iU', '<amp-img${1}${5} />', $page);
+		$page = preg_replace('/<amp-img\b([^>]*) align=(("[^"]*")|(\'[^\']*\'))([^>]*)\s*?\/?>/iU', '<amp-img${1}${5} />', $page);
 
 		// The attribute 'async' may not appear in tag 'amp-img'.
-		$page = preg_replace('/<amp-img\b([^>]*) async=(("[^"]*")|(\'[^\']*\'))([^>]*)\s?\/?>/iU', '<amp-img${1}${5} />', $page);
+		$page = preg_replace('/<amp-img\b([^>]*) async=(("[^"]*")|(\'[^\']*\'))([^>]*)\s*?\/?>/iU', '<amp-img${1}${5} />', $page);
 
 		// The attribute 'border' may not appear in tag 'amp-img'.
-		$page = preg_replace('/<amp-img\b([^>]*) border=(("[^"]*")|(\'[^\']*\'))([^>]*)\s?\/?>/iU', '<amp-img${1}${5} />', $page);
+		$page = preg_replace('/<amp-img\b([^>]*) border=(("[^"]*")|(\'[^\']*\'))([^>]*)\s*?\/?>/iU', '<amp-img${1}${5} />', $page);
 
 		// The attribute 'usemap' may not appear in tag 'amp-img'.
-		$page = preg_replace('/<amp-img\b([^>]*) usemap=(("[^"]*")|(\'[^\']*\'))([^>]*)\s?\/?>/iU', '<amp-img${1}${5} />', $page);
+		$page = preg_replace('/<amp-img\b([^>]*) usemap=(("[^"]*")|(\'[^\']*\'))([^>]*)\s*?\/?>/iU', '<amp-img${1}${5} />', $page);
 
 
 		/*
@@ -612,7 +624,7 @@ class PWAMP_TranscodingCommon
 		$page = preg_replace('/<span\b([^>]*) override=(("[^"]*")|(\'[^\']*\'))([^>]*)\s*?>/iU', '<span${1}${5}>', $page);
 
 		// The attribute 'temscope' may not appear in tag 'span'.
-		$page = preg_replace('/<span\b([^>]*) temscope(=(("[^"]*")|(\'[^\']*\')))?([^>]*)\s*?>/iU', '<span${1}${6}>', $page);
+		$page = preg_replace('/<span\b([^>]*) temscope\b(=(("[^"]*")|(\'[^\']*\')))?([^>]*)\s*?>/iU', '<span${1}${6}>', $page);
 
 
 		/*
@@ -644,6 +656,13 @@ class PWAMP_TranscodingCommon
 			<title></title>
 		*/
 		$page = preg_replace('/^[\s\t]*<title>(.*)<\/title>/im', '<title>${1}</title>', $page, 1);
+
+
+		/*
+			<time></time>
+		*/
+		// The attribute 'pubdate' may not appear in tag 'time'.
+		$page = preg_replace('/<time\b([^>]*) pubdate\b(=(("[^"]*")|(\'[^\']*\')))?([^>]*)\s*?>/iU', '<time${1}${6}>', $page);
 
 
 		/*

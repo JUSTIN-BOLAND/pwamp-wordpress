@@ -1,9 +1,9 @@
 <?php
 /*
-Plugin Name: WordPress PWAMP
+Plugin Name: PWAMP WordPress
 Plugin URI:  https://flexplat.com
 Description: Transcodes WordPress into both first load cache-enabled of PWA and lightning fast load time of AMP style.
-Version:     2.4.0
+Version:     2.5.0
 Author:      Rickey Gu
 Author URI:  https://flexplat.com
 Text Domain: pwamp
