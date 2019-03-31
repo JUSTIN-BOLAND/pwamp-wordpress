@@ -5,7 +5,7 @@ Tags: amp, pwa, awd, rwd, mobile, accelerated mobile pages, progressive web apps
 Requires at least: 4.7
 Tested up to: 5.1.1
 Requires PHP: 5.2.4
-Stable tag: 2.5.0
+Stable tag: 2.6.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -40,6 +40,10 @@ Enter "https://yoursite.com/?desktop" in your web browser address bar.
 1. https://download.flexplat.com/pwamp-wordpress.png
 
 == Changelog ==
+
+= 2.6.0 =
+(Sun., Mar. 31, 2019)
+* new feature: support more web site(s)
 
 = 2.5.0 =
 (Sun., Mar. 24, 2019)

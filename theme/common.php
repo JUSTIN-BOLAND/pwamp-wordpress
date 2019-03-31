@@ -96,17 +96,14 @@ class PWAMP_TranscodingCommon
 
 	protected function get_style()
 	{
+		$this->style = '.fixed-height-container{position:relative;width:100%;height:300px}amp-img.contain img{object-fit:contain}.revert{all:revert;display:inline}';
 		if ( !empty($this->style_list[$this->page_type]) )
 		{
-			$this->style = $this->style_list[$this->page_type];
+			$this->style .= $this->style_list[$this->page_type];
 		}
 		elseif ( !empty($this->style_list['default']) )
 		{
-			$this->style = $this->style_list['default'];
-		}
-		else
-		{
-			$this->style = '';
+			$this->style .= $this->style_list['default'];
 		}
 	}
 
@@ -208,7 +205,7 @@ class PWAMP_TranscodingCommon
 		$css = preg_replace('/\/\*[^*]*\*+([^\/][^*]*\*+)*\//', '', $css);
 		$css = preg_replace('/\s*!important/i', '', $css);
 		$css = str_replace(array("\r\n", "\r", "\n", "\t", '  ', '   ', '    '), '', $css);
-		$css = str_replace(array(' {', '{ ', ': ', ', ', '; ', ' }', ';}'), array('{', '{', ':', ',', ';', '}', '}'), $css);
+		$css = str_replace(array(' {', '{ ', ': ', ', ', '; ', ' }', ';}', '} '), array('{', '{', ':', ',', ';', '}', '}', '}'), $css);
 
 		if ( preg_match('/{}$/im', $css) )
 		{
@@ -348,7 +345,20 @@ class PWAMP_TranscodingCommon
 		/*
 			<form></form>
 		*/
+		// The attribute 'action' may not appear in tag 'FORM [method=POST]'.
+		$pattern = '/<form\b([^>]* method=(("post")|(\'post\'))[^>]*)\s?>/i';
+		if ( preg_match_all($pattern, $page, $matches) )
+		{
+			foreach ( $matches[1] as $value )
+			{
+				$value = preg_replace('/ action=(("([^"]*)")|(\'([^\']*)\'))/i', ' action-xhr="${3}${5}"', $value);
+				$value = preg_replace('/ action-xhr="http:\/\/([^"]*)"/i', ' action-xhr="https://${1}"', $value);
+				$page = preg_replace($pattern, '<amp-form' . $value . '>', $page, 1);
+			}
+		}
+
 		// The mandatory attribute 'action' is missing in tag 'FORM [method=GET]'.
+		// The mandatory attribute 'target' is missing in tag 'FORM [method=GET]'.
 		$pattern = '/<form\b([^>]*)\s?>/i';
 		if ( preg_match_all($pattern, $page, $matches) )
 		{
@@ -358,18 +368,15 @@ class PWAMP_TranscodingCommon
 				{
 					$value .= ' action="' . $this->home_url . '"';
 				}
+				if ( !preg_match('/ target=(("([^"]*)")|(\'([^\']*)\'))/i', $value) )
+				{
+					$value .= ' target="_top"';
+				}
 				$page = preg_replace($pattern, '<amp-form' . $value . '>', $page, 1);
 			}
 		}
 
 		$page = preg_replace('/<amp-form\b([^>]*)>/i', '<form${1}>', $page);
-
-		// The attribute 'action' may not appear in tag 'FORM [method=POST]'.
-		$page = preg_replace('/<form\b([^>]*) action=(("([^"]*)")|(\'([^\']*)\'))([^>]*) method=(("post")|(\'post\'))([^>]*)\s*?>/iU', '<form${1} action-xhr="${4}${6}"${7} method="post"${11}>', $page);
-		$page = preg_replace('/<form\b([^>]*) method=(("post")|(\'post\'))([^>]*) action=(("([^"]*)")|(\'([^\']*)\'))([^>]*)\s*?>/iU', '<form${1} method="post"${5} action-xhr="${8}${10}"${11}>', $page);
-
-		// The mandatory attribute 'target' is missing in tag 'FORM [method=GET]'.
-		$page = preg_replace('/<form\b([^>]*)>/i', '<form${1} target="_top">', $page);
 
 
 		/*
@@ -417,6 +424,12 @@ class PWAMP_TranscodingCommon
 		// The attribute 'frameborder' in tag 'amp-iframe' is set to the invalid value 'no'.
 		$page = preg_replace('/<amp-iframe\b([^>]*) frameborder=(("no")|(\'no\'))([^>]*)>/i', '<amp-iframe${1} frameborder="0"${5}>', $page);
 
+		// The attribute 'marginheight' may not appear in tag 'amp-iframe'.
+		$page = preg_replace('/<amp-iframe\b([^>]*) marginheight=(("[^"]*")|(\'[^\']*\'))([^>]*)\s*?>/iU', '<amp-iframe${1}${5}>', $page);
+
+		// The attribute 'marginwidth' may not appear in tag 'amp-iframe'.
+		$page = preg_replace('/<amp-iframe\b([^>]*) marginwidth=(("[^"]*")|(\'[^\']*\'))([^>]*)\s*?>/iU', '<amp-iframe${1}${5}>', $page);
+
 		// The attribute 'mozallowfullscreen' may not appear in tag 'amp-iframe'.
 		$page = preg_replace('/<amp-iframe\b([^>]*) mozallowfullscreen\b(=(("[^"]*")|(\'[^\']*\')))?([^>]*)\s*?>/iU', '<amp-iframe${1}${6}>', $page);
 
@@ -436,10 +449,41 @@ class PWAMP_TranscodingCommon
 		$page = preg_replace('/<img\b([^>]*) src=(("[^"]+(data:image\/gif;base64,[^"]+)")|(\'[^\']+(data:image\/gif;base64,[^\']+)\'))([^>]*)\s*?\/?>/iU', '<img${1} src="${4}${6}"${7} />', $page);
 		$page = preg_replace('/<img\b([^>]*) src=(("\/\/([^"]+)")|(\'\/\/([^\']+)\'))([^>]*)\s*?\/?>/iU', '<img${1} src="https://${4}${6}"${7} />', $page);
 
-		$page = preg_replace('/<img\b([^>]*) width="100%"([^>]*)\s*?\/?>/iU', '<img${1}${2} />', $page);
+		$page = preg_replace('/<img\b([^>]*) width=(("\d+%")|(\'\d+%\'))([^>]*)\s*?\/?>/iU', '<img${1}${2} />', $page);
+		$page = preg_replace('/<img\b([^>]*) height=(("\d+%")|(\'\d+%\'))([^>]*)\s*?\/?>/iU', '<img${1}${2} />', $page);
 
 		// The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'?
-		$page = preg_replace('/<img\b([^>]*)\s*?\/?>/iU', '<div style="all:revert;display:inline"><amp-img${1}' . ( !preg_match('/ layout=(("[^"]*")|(\'[^\']*\'))/i', '${1}') ? ' layout="intrinsic"' : '' ) . ' /></div>', $page);
+		$pattern = '/<img\b([^>]*)\s*?\/?>/iU';
+		$pattern2 = '/ class=(("([^"]*)")|(\'([^\']*)\'))/i';
+		if ( preg_match_all($pattern, $page, $matches) )
+		{
+			foreach ( $matches[1] as $key => $value )
+			{
+				if ( !preg_match('/ width=(("[^"]*")|(\'[^\']*\'))/i', $value) || !preg_match('/ height=(("[^"]*")|(\'[^\']*\'))/i', $value) )
+				{
+					if ( preg_match($pattern2, $value) )
+					{
+						$value = preg_replace($pattern2, ' class="${3}${5} contain"', $value);
+					}
+					else
+					{
+						$value .= ' class="contain"';
+					}
+
+					$value = preg_replace('/ layout=(("[^"]*")|(\'[^\']*\'))/i', '', $value);
+					$value .= ' layout="fill"';
+
+					$page = preg_replace($pattern, '<div class="fixed-height-container"><amp-img' . $value . ' /></div>', $page, 1);
+				}
+				else
+				{
+					$value = preg_replace('/ layout=(("[^"]*")|(\'[^\']*\'))/i', '', $value);
+					$value .= ' layout="intrinsic"';
+
+					$page = preg_replace($pattern, '<div class="revert"><amp-img' . $value . ' /></div>', $page, 1);
+				}
+			}
+		}
 
 		// The attribute 'align' may not appear in tag 'amp-img'.
 		$page = preg_replace('/<amp-img\b([^>]*) align=(("[^"]*")|(\'[^\']*\'))([^>]*)\s*?\/?>/iU', '<amp-img${1}${5} />', $page);
@@ -452,6 +496,13 @@ class PWAMP_TranscodingCommon
 
 		// The attribute 'usemap' may not appear in tag 'amp-img'.
 		$page = preg_replace('/<amp-img\b([^>]*) usemap=(("[^"]*")|(\'[^\']*\'))([^>]*)\s*?\/?>/iU', '<amp-img${1}${5} />', $page);
+
+
+		/*
+			<input>
+		*/
+		// The attribute 'tooltip' may not appear in tag 'input'.
+		$page = preg_replace('/<input\b([^>]*) tooltip=(("[^"]*")|(\'[^\']*\'))([^>]*)\s*?>/iU', '<input${1}${5}>', $page);
 
 
 		/*
@@ -648,6 +699,9 @@ class PWAMP_TranscodingCommon
 		/*
 			<textarea></textarea>
 		*/
+		// The attribute 'tooltip' may not appear in tag 'textarea'.
+		$page = preg_replace('/<textarea\b([^>]*) tooltip=(("[^"]*")|(\'[^\']*\'))([^>]*)\s*?>/iU', '<textarea${1}${5}>', $page);
+
 		// The attribute 'value' may not appear in tag 'textarea'.
 		$page = preg_replace('/<textarea\b([^>]*) value=(("[^"]*")|(\'[^\']*\'))([^>]*)\s*?>/iU', '<textarea${1}${5}>', $page);
 
@@ -663,6 +717,13 @@ class PWAMP_TranscodingCommon
 		*/
 		// The attribute 'pubdate' may not appear in tag 'time'.
 		$page = preg_replace('/<time\b([^>]*) pubdate\b(=(("[^"]*")|(\'[^\']*\')))?([^>]*)\s*?>/iU', '<time${1}${6}>', $page);
+
+
+		/*
+			<ul></ul>
+		*/
+		// The attribute 'featured_post_id' may not appear in tag 'ul'.
+		$page = preg_replace('/<ul\b([^>]*) featured_post_id=(("[^"]*")|(\'[^\']*\'))([^>]*)\s*?>/iU', '<ul${1}${5}>', $page);
 
 
 		/*
