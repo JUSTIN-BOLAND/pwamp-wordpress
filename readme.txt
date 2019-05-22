@@ -1,11 +1,11 @@
 === PWAMP WordPress ===
 Contributors: rickey29
-Donate link: https://flexplat.com
+Donate link: https://flexplat.com/pwamp-wordpress/
 Tags: amp, pwa, awd, rwd, mobile, accelerated mobile pages, progressive web apps, adaptive web design, responsive web design, wordpress, plugin, theme, mobile-friendly, mobile-first, mobile-ready, touch-optimized
 Requires at least: 4.7
-Tested up to: 5.1.1
+Tested up to: 5.2
 Requires PHP: 5.2.4
-Stable tag: 2.6.0
+Stable tag: 2.7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -25,7 +25,7 @@ Transcodes WordPress into both first load cache-enabled of PWA and lightning fas
 
 Enter "https://yoursite.com/?amp" in your web browser address bar.
 
-= How to make web browser switch to original theme pages? =
+= How to make web browser switch to original theme/style pages? =
 
 Enter "https://yoursite.com/?desktop" in your web browser address bar.
 
@@ -40,6 +40,10 @@ Enter "https://yoursite.com/?desktop" in your web browser address bar.
 1. https://download.flexplat.com/pwamp-wordpress.png
 
 == Changelog ==
+
+= 2.7.0 =
+(Thur., May 16, 2019)
+* new feature: inline with PWAMP MyBB 1.8
 
 = 2.6.0 =
 (Sun., Mar. 31, 2019)
