@@ -886,7 +886,7 @@ class PWAMPTranscodingCommon
 		{
 			$header .= "\n" . '<link rel="manifest" href="' . $this->home_url . '/' . ( !empty($this->permalink) ? 'manifest.webmanifest' : '?manifest.webmanifest' ) . '" />';
 			$header .= "\n" . '<meta name="theme-color" content="#ffffff" />';
-			$header .= "\n" . '<link rel="apple-touch-icon" href="' . $this->plugins_url . '/pwamp/mf/mf-logo-192.png" />';
+			$header .= "\n" . '<link rel="apple-touch-icon" href="' . $this->plugins_url . '/pwamp/pwamp/mf/mf-logo-192.png" />';
 		}
 
 		if ( !empty($this->page_type) )

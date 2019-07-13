@@ -2,8 +2,8 @@
 /*
 Plugin Name: PWA AMP WordPress
 Plugin URI:  https://flexplat.com/pwamp-wordpress/
-Description: Converts WordPress into Progressive Web Apps and Accelerated Mobile Pages style.  For more theme conversion, please visit: https://flexplat.com/pwamp-wordpress/ .
-Version:     3.0.0
+Description: Converts WordPress theme into Progressive Web Apps and Accelerated Mobile Pages style.  For more theme conversion, please visit: https://flexplat.com/pwamp-wordpress/ .
+Version:     3.1.0
 Author:      Rickey Gu
 Author URI:  https://flexplat.com
 Text Domain: pwamp
@@ -18,8 +18,6 @@ if ( !defined('ABSPATH') )
 
 class PWAMP
 {
-	private $default_theme = 'twentynineteen';
-
 	private $time = 0;
 
 	private $page = '';
@@ -73,11 +71,11 @@ class PWAMP
 	"short_name": "' . get_bloginfo('name') . '",
 	"start_url": "' . $this->home_url . '",
 	"icons": [{
-		"src": ".' . str_replace($this->home_url, '', $this->plugin_dir_url) . 'mf/mf-logo-192.png",
+		"src": ".' . str_replace($this->home_url, '', $this->plugin_dir_url) . 'pwamp/mf/mf-logo-192.png",
 		"sizes": "192x192",
 		"type": "image/png"
 	}, {
-		"src": ".' . str_replace($this->home_url, '', $this->plugin_dir_url) . 'mf/mf-logo-512.png",
+		"src": ".' . str_replace($this->home_url, '', $this->plugin_dir_url) . 'pwamp/mf/mf-logo-512.png",
 		"sizes": "512x512",
 		"type": "image/png"
 	}],
@@ -115,7 +113,7 @@ class PWAMP
 		elseif ( preg_match('/^' . $pattern . '\/((index\.php)?\?)?pwamp-sw-js$/im', $this->page_url) )
 		{
 			header('Content-Type: application/javascript', true);
-			echo 'importScripts(\'.' . str_replace($this->home_url, '', $this->plugin_dir_url) . 'sw/sw-toolbox.js\');
+			echo 'importScripts(\'.' . str_replace($this->home_url, '', $this->plugin_dir_url) . 'pwamp/sw/sw-toolbox.js\');
 toolbox.router.default = toolbox.cacheFirst;
 self.addEventListener(\'install\', function(event) {
 	console.log(\'SW: Installing service worker\');
@@ -259,6 +257,17 @@ self.addEventListener(\'install\', function(event) {
 	}
 
 
+	public function stylesheet($theme)
+	{
+		return 'twentynineteen';
+	}
+
+	public function template($theme)
+	{
+		return 'twentynineteen';
+	}
+
+
 	private function catch_page_callback($page)
 	{
 		$this->page .= $page;
@@ -378,17 +387,6 @@ self.addEventListener(\'install\', function(event) {
 	}
 
 
-	public function stylesheet($theme)
-	{
-		return $this->default_theme;
-	}
-
-	public function template($theme)
-	{
-		return $this->default_theme;
-	}
-
-
 	public function plugins_loaded()
 	{
 		if ( is_admin() || $GLOBALS['pagenow'] === 'wp-login.php' )
@@ -413,14 +411,7 @@ self.addEventListener(\'install\', function(event) {
 		}
 		else
 		{
-			if ( file_exists($this->plugin_dir_path . 'flx/detection.php') )
-			{
-				require_once $this->plugin_dir_path . 'flx/detection.php';
-			}
-			else
-			{
-				require_once $this->plugin_dir_path . 'detection.php';
-			}
+			require_once $this->plugin_dir_path . 'pwamp/detection.php';
 
 			$device = $this->get_device();
 			if ( empty($device) )
@@ -452,25 +443,10 @@ self.addEventListener(\'install\', function(event) {
 		}
 
 
-		if ( file_exists($this->plugin_dir_path . 'personal.php') )
-		{
-			require_once $this->plugin_dir_path . 'personal.php';
-		}
-		elseif ( file_exists($this->plugin_dir_path . 'flx/transcoding.php') )
-		{
-			require_once $this->plugin_dir_path . 'flx/transcoding.php';
-		}
-		elseif ( file_exists($this->plugin_dir_path . $this->theme . '.php') )
-		{
-			require_once $this->plugin_dir_path . $this->theme . '.php';
-		}
-		else
-		{
-			require_once $this->plugin_dir_path . $this->default_theme . '.php';
+		require_once $this->plugin_dir_path . 'pwamp/transcoding.php';
 
-			add_filter('stylesheet', array($this, 'stylesheet'));
-			add_filter('template', array($this, 'template'));
-		}
+		add_filter('stylesheet', array($this, 'stylesheet'));
+		add_filter('template', array($this, 'template'));
 
 
 		add_action('after_setup_theme', array($this, 'after_setup_theme'));

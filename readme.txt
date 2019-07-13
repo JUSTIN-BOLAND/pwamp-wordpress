@@ -1,15 +1,15 @@
 === PWA AMP WordPress ===
 Contributors: rickey29
 Donate link: https://flexplat.com/pwamp-wordpress/
-Tags: amp, pwa, awd, rwd, mobile, accelerated mobile pages, progressive web apps, adaptive web design, responsive web design, wordpress, plugin, theme, mobile-friendly, mobile-first, mobile-ready, touch-optimized
+Tags: wordpress, amp, plugin, google, theme, pwa, accelerated mobile pages, progressive web apps, pwamp, wp
 Requires at least: 4.7
 Tested up to: 5.2.2
 Requires PHP: 5.2.4
-Stable tag: 3.0.0
+Stable tag: 3.1.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Converts WordPress into Progressive Web Apps and Accelerated Mobile Pages style.
+Converts WordPress theme into Progressive Web Apps and Accelerated Mobile Pages style.
 
 == Description ==
 
@@ -72,6 +72,10 @@ You can Google to find the solution, for example, this one: https://www.howtogee
 1. https://download.flexplat.com/pwamp-wordpress.png
 
 == Changelog ==
+
+= 3.1.0 =
+(Sat., Jul. 13, 2019)
+* retrofit continue
 
 = 3.0.0 =
 (Sun., Jul. 07, 2019)
