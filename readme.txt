@@ -1,19 +1,19 @@
-=== PWA AMP WordPress ===
+=== PWA AMP ===
 Contributors: rickey29
 Donate link: https://flexplat.com/pwamp-wordpress/
 Tags: wordpress, amp, plugin, google, theme, pwa, accelerated mobile pages, progressive web apps, pwamp, wp
 Requires at least: 4.7
 Tested up to: 5.2.2
 Requires PHP: 5.2.4
-Stable tag: 3.1.0
+Stable tag: 3.2.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Converts WordPress theme into Progressive Web Apps and Accelerated Mobile Pages style.
+Converts WordPress themes into Progressive Web Apps and Accelerated Mobile Pages styles.
 
 == Description ==
 
-PWA AMP WordPress plugin converts WordPress theme into Progressive Web Apps and Accelerated Mobile Pages style.  For more theme conversion, please visit: https://flexplat.com/pwamp-wordpress/ .
+PWA AMP plugin converts WordPress themes into Progressive Web Apps and Accelerated Mobile Pages styles.  For more theme conversion, please visit: https://flexplat.com/pwamp-wordpress/ .
 
 == Installation ==
 1. Upload the plugin files to the '/wp-content/plugins/pwamp' directory, or install the plugin through the WordPress plugins screen directly.
@@ -45,8 +45,8 @@ I use Chrome Lighthouse Extension: https://chrome.google.com/webstore/detail/lig
 You can Google to find the solution, for example, this one: https://www.howtogeek.com/196087/how-to-add-websites-to-the-home-screen-on-any-smartphone-or-tablet/ .
 
 == Download ==
-1. WordPress Plugins Libraries: https://wordpress.org/plugins/pwamp/
-2. GitHub: https://github.com/rickey29/pwamp-wordpress
+1. GitHub: https://github.com/rickey29/pwamp-wordpress
+2. WordPress Plugins Libraries: https://wordpress.org/plugins/pwamp/
 
 == Demo sites ==
 1. https://hestia.flexplat.com/?amp=1

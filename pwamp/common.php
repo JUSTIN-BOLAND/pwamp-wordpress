@@ -11,9 +11,10 @@ class PWAMPTranscodingCommon
 	protected $page_type;
 	protected $themes_url;
 	protected $plugins_url;
+	protected $page_url;
 	protected $viewport_width;
 	protected $permalink;
-	protected $page_url;
+	protected $plugin_dir_url;
 	protected $canonical;
 
 
@@ -59,6 +60,15 @@ class PWAMPTranscodingCommon
 			$this->plugins_url = '';
 		}
 
+		if ( !empty($data['page_url']) && is_string($data['page_url']) )
+		{
+			$this->page_url = $data['page_url'];
+		}
+		else
+		{
+			$this->page_url = $home_url . '/';
+		}
+
 		if ( !empty($data['viewport_width']) && is_string($data['viewport_width']) )
 		{
 			$this->viewport_width = (int)$data['viewport_width'];
@@ -77,13 +87,13 @@ class PWAMPTranscodingCommon
 			$this->permalink = '';
 		}
 
-		if ( !empty($data['page_url']) && is_string($data['page_url']) )
+		if ( !empty($data['plugin_dir_url']) && is_string($data['plugin_dir_url']) )
 		{
-			$this->page_url = $data['page_url'];
+			$this->plugin_dir_url = $data['plugin_dir_url'];
 		}
 		else
 		{
-			$this->page_url = $home_url . '/';
+			$this->plugin_dir_url = '';
 		}
 
 		if ( !empty($data['canonical']) && is_string($data['canonical']) )
@@ -886,7 +896,7 @@ class PWAMPTranscodingCommon
 		{
 			$header .= "\n" . '<link rel="manifest" href="' . $this->home_url . '/' . ( !empty($this->permalink) ? 'manifest.webmanifest' : '?manifest.webmanifest' ) . '" />';
 			$header .= "\n" . '<meta name="theme-color" content="#ffffff" />';
-			$header .= "\n" . '<link rel="apple-touch-icon" href="' . $this->plugins_url . '/pwamp/pwamp/mf/mf-logo-192.png" />';
+			$header .= "\n" . '<link rel="apple-touch-icon" href="' . $this->plugin_dir_url . 'pwamp/mf/mf-logo-192.png" />';
 		}
 
 		if ( !empty($this->page_type) )
