@@ -128,6 +128,8 @@ class PWAMPTranscodingCommon
 			return;
 		}
 
+		$this->style = preg_replace('/@media\b[^{]+\{\}/', '', $this->style);
+
 		preg_match_all('/@media\b([^{]+)\{([\s\S]+?\})\s*\}/', $this->style, $matches);
 		foreach ( $matches[1] as $key => $value )
 		{
