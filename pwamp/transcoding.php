@@ -4,8 +4,6 @@ if ( !defined('ABSPATH') )
 	exit;
 }
 
-require_once plugin_dir_path(__FILE__) . 'common.php';
-
 class PWAMPTranscoding extends PWAMPTranscodingCommon
 {
 	protected $style_list = array(

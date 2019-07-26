@@ -3,7 +3,7 @@
 Plugin Name: PWA AMP
 Plugin URI:  https://flexplat.com/pwamp-wordpress/
 Description: Converts WordPress themes into Progressive Web Apps and Accelerated Mobile Pages styles.  For more theme conversion, please visit: https://flexplat.com/pwamp-wordpress/ .
-Version:     3.3.0
+Version:     3.4.0
 Author:      Rickey Gu
 Author URI:  https://flexplat.com
 Text Domain: pwamp
@@ -14,11 +14,6 @@ if ( !defined('ABSPATH') )
 {
 	exit;
 }
-
-require_once ABSPATH . 'wp-admin/includes/plugin.php';
-
-require_once plugin_dir_path(__FILE__) . 'pwamp/detection.php';
-require_once plugin_dir_path(__FILE__) . 'pwamp/transcoding.php';
 
 
 class PWAMP
@@ -36,6 +31,7 @@ class PWAMP
 	private $plugin_dir_url = '';
 
 	private $plugin_dir = '';
+	private $plugin_dir_path = '';
 
 
 	public function __construct()
@@ -64,6 +60,7 @@ class PWAMP
 
 		$this->plugin_dir = str_replace($this->home_url, '', $this->plugin_dir_url);
 		$this->plugin_dir = preg_replace('/\/$/im', '', $this->plugin_dir);
+		$this->plugin_dir_path = plugin_dir_path(__FILE__);
 	}
 
 	private function divert()
@@ -399,6 +396,8 @@ toolbox.router.default = toolbox.cacheFirst;';
 		}
 
 
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+
 		$this->init();
 
 		$this->divert();
@@ -414,6 +413,15 @@ toolbox.router.default = toolbox.cacheFirst;';
 		}
 		else
 		{
+			if ( is_plugin_active('pwamp-online/pwamp.php') )
+			{
+				require_once $this->plugin_dir_path . '../pwamp-online/pwamp/detection.php';
+			}
+			else
+			{
+				require_once $this->plugin_dir_path . 'pwamp/detection.php';
+			}
+
 			$device = $this->get_device();
 			if ( empty($device) )
 			{
@@ -443,8 +451,27 @@ toolbox.router.default = toolbox.cacheFirst;';
 		}
 
 
-		add_filter('stylesheet', array($this, 'stylesheet'));
-		add_filter('template', array($this, 'template'));
+		require_once $this->plugin_dir_path . 'pwamp/common.php';
+
+		if ( is_plugin_active('pwamp-premium/pwamp.php') )
+		{
+			require_once $this->plugin_dir_path . '../pwamp-premium/pwamp/transcoding.php';
+		}
+		elseif ( is_plugin_active('pwamp-online/pwamp.php') )
+		{
+			require_once $this->plugin_dir_path . '../pwamp-online/pwamp/transcoding.php';
+		}
+		elseif ( is_plugin_active('pwamp-' . $this->theme . '/pwamp.php') )
+		{
+			require_once $this->plugin_dir_path . '../pwamp-' . $this->theme . '/pwamp/transcoding.php';
+		}
+		else
+		{
+			require_once $this->plugin_dir_path . 'pwamp/transcoding.php';
+
+			add_filter('stylesheet', array($this, 'stylesheet'));
+			add_filter('template', array($this, 'template'));
+		}
 
 
 		add_action('after_setup_theme', array($this, 'after_setup_theme'));

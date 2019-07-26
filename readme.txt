@@ -5,7 +5,7 @@ Tags: wordpress, amp, plugin, google, theme, pwa, accelerated mobile pages, prog
 Requires at least: 4.7
 Tested up to: 5.2.2
 Requires PHP: 5.2.4
-Stable tag: 3.3.0
+Stable tag: 3.4.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,10 @@ You can Google to find the solution, for example, this one: https://www.howtogee
 
 == Changelog ==
 
+= 3.4.0 =
+(Fri., Jul. 26, 2019)
+* more retrofit
+
 = 3.3.0 =
 (Sun., Jul. 21, 2019)
 * new feature: support TwentySeventeen
@@ -135,7 +139,8 @@ None.
 None.
 
 == Open Issue ==
-None.
+* https://github.com/GoogleChrome/lighthouse/issues/7158
+* https://github.com/GoogleChromeLabs/sw-toolbox/issues/277
 
 == Configuration ==
 None.
