@@ -3,7 +3,7 @@
 Plugin Name: PWA AMP
 Plugin URI:  https://flexplat.com/pwamp-wordpress/
 Description: Converts WordPress themes into Progressive Web Apps and Accelerated Mobile Pages styles.  For more theme conversion, please visit: https://flexplat.com/pwamp-wordpress/ .
-Version:     3.4.0
+Version:     3.5.0
 Author:      Rickey Gu
 Author URI:  https://flexplat.com
 Text Domain: pwamp
@@ -66,7 +66,7 @@ class PWAMP
 	private function divert()
 	{
 		$pattern = str_replace(array('/', '.'), array('\/', '\.'), $this->home_url);
-		if ( preg_match('/^' . $pattern . '\/((index\.php)?\?)?manifest\.webmanifest$/im', $this->page_url) )
+		if ( preg_match('/^' . $pattern . '\/\??manifest\.webmanifest$/im', $this->page_url) )
 		{
 			header('Content-Type: application/x-web-app-manifest+json', true);
 			echo '{
@@ -89,7 +89,7 @@ class PWAMP
 
 			exit();
 		}
-		elseif ( preg_match('/^' . $pattern . '\/((index\.php)?\?)?pwamp-sw-html$/im', $this->page_url) )
+		elseif ( preg_match('/^' . $pattern . '\/\??pwamp-sw-html$/im', $this->page_url) )
 		{
 			header('Content-Type: text/html; charset=utf-8', true);
 			echo '<!doctype html>
@@ -113,7 +113,7 @@ class PWAMP
 
 			exit();
 		}
-		elseif ( preg_match('/^' . $pattern . '\/((index\.php)?\?)?pwamp-sw-js$/im', $this->page_url) )
+		elseif ( preg_match('/^' . $pattern . '\/\??pwamp-sw-js$/im', $this->page_url) )
 		{
 			header('Content-Type: application/javascript', true);
 			echo 'importScripts(\'.' . $this->plugin_dir . '/pwamp/sw/sw-toolbox.js\');
@@ -121,7 +121,7 @@ toolbox.router.default = toolbox.cacheFirst;';
 
 			exit();
 		}
-		elseif ( preg_match('/^' . $pattern . '\/(index\.php)?\?pwamp-viewport-width=(\d+)$/im', $this->page_url, $matches) )
+		elseif ( preg_match('/^' . $pattern . '\/\?pwamp-viewport-width=(\d+)$/im', $this->page_url, $matches) )
 		{
 			$viewport_width = $matches[2];
 
@@ -403,9 +403,9 @@ toolbox.router.default = toolbox.cacheFirst;';
 		$this->divert();
 
 
-		if ( !empty($_GET['amp']) || !empty($_GET['desktop']) )
+		if ( isset($_GET['amp']) || isset($_GET['desktop']) )
 		{
-			$device = empty($_GET['amp']) ? 'desktop' : 'mobile';
+			$device = !isset($_GET['amp']) ? 'desktop' : 'mobile';
 		}
 		elseif ( !empty($_COOKIE['pwamp_style']) )
 		{

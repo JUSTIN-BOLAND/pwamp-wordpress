@@ -306,17 +306,14 @@ class PWAMPTranscodingCommon
 			<body></body>
 		*/
 		// Service Workers
-		$pattern = str_replace(array('/', '.'), array('\/', '\.'), $this->home_url);
-		if ( preg_match('/^' . $pattern . '\/(index\.php)?(\?amp(=1)?)?$/im', $this->page_url) )
-		{
-			$serviceworker = '<amp-install-serviceworker
+		$page = preg_replace('/<amp-install-serviceworker.+>.*<\/amp-install-serviceworker>/isU', '', $page);
+
+		$serviceworker = '<amp-install-serviceworker
 	src="' . $this->home_url . '/' . ( !empty($this->permalink) ? 'pwamp-sw-js' : '?pwamp-sw-js' ) . '"
 	data-iframe-src="' . $this->home_url . '/' . ( !empty($this->permalink) ? 'pwamp-sw-html' : '?pwamp-sw-html' ) . '"
 	layout="nodisplay">
 </amp-install-serviceworker>';
-
-			$page = preg_replace('/<\/body>/i', $serviceworker . "\n" . '</body>', $page, 1);
-		}
+		$page = preg_replace('/<\/body>/i', $serviceworker . "\n" . '</body>', $page, 1);
 
 		// Viewport Width
 		if ( empty($this->viewport_width) )
@@ -441,6 +438,7 @@ class PWAMPTranscodingCommon
 		// The attribute 'xmlns:og' may not appear in tag 'html'.
 		$page = preg_replace('/<html\b([^>]*) xmlns:og=(("[^"]*")|(\'[^\']*\'))([^>]*)\s*?>/iU', '<html${1}${5}>', $page);
 
+		$page = preg_replace('/<html ((amp)|(⚡)) /i', '<html ', $page);
 		$page = preg_replace('/<html\b([^>]*)>/i', '<html amp${1}>', $page, 1);
 
 
@@ -707,7 +705,8 @@ class PWAMPTranscodingCommon
 			<style></style>
 		*/
 		// The mandatory attribute 'amp-custom' is missing in tag 'style amp-custom'.
-		$page = preg_replace('/(<noscript>)?<style\b[^>]*>.*<\/style>(<\/noscript>)?/isU', '', $page);
+		$page = preg_replace('/<style\b[^>]*>.*<\/style>/isU', '', $page);
+		$page = preg_replace('/<noscript><\/noscript>/i', '', $page);
 
 
 		/*
@@ -801,12 +800,6 @@ class PWAMPTranscodingCommon
 			$page = preg_replace('/<amp-textarea\b([^>]*)>(.*)<\/amp-textarea>/isU', '<textarea${1}>${2}</textarea>', $page);
 		}
 
-		// Remove blank lines.
-		$page = preg_replace('/(^[\r\n]*|[\r\n]+)[\s\t]*[\r\n]+/', "\n", $page);
-
-		// Remove end line spaces.
-		$page = preg_replace('/[\s\t]+[\r\n]/', "\n", $page);
-
 		$pattern = '/<textarea\b([^>]*)>(.*)<\/textarea>/isU';
 		if ( preg_match_all($pattern, $page, $matches) )
 		{
@@ -893,19 +886,28 @@ class PWAMPTranscodingCommon
 		}
 
 		// Progressive Web Apps
-		$pattern = str_replace(array('/', '.'), array('\/', '\.'), $this->home_url);
-		if ( preg_match('/^' . $pattern . '\/(index\.php)?(\?amp(=1)?)?$/im', $this->page_url) )
-		{
-			$header .= "\n" . '<link rel="manifest" href="' . $this->home_url . '/' . ( !empty($this->permalink) ? 'manifest.webmanifest' : '?manifest.webmanifest' ) . '" />';
-			$header .= "\n" . '<meta name="theme-color" content="#ffffff" />';
-			$header .= "\n" . '<link rel="apple-touch-icon" href="' . $this->plugin_dir_url . 'pwamp/mf/mf-logo-192.png" />';
-		}
+		$page = preg_replace('/<link rel="manifest" href="[^"]+"\s*\/?>/i', '', $page);
+		$page = preg_replace('/<meta name="theme-color" content="[^"]+"\s*\/?>/i', '', $page);
+		$page = preg_replace('/<link rel="apple-touch-icon" href="[^"]+"\s*\/?>/i', '', $page);
 
+		$header .= "\n" . '<link rel="manifest" href="' . $this->home_url . '/' . ( !empty($this->permalink) ? 'manifest.webmanifest' : '?manifest.webmanifest' ) . '" />';
+		$header .= "\n" . '<meta name="theme-color" content="#ffffff" />';
+		$header .= "\n" . '<link rel="apple-touch-icon" href="' . $this->plugin_dir_url . 'pwamp/mf/mf-logo-192.png" />';
+
+		// pwamp-page-type
+		$page = preg_replace('/<meta name="pwamp-page-type" content="[^"]+"\s*\/?>/i', '', $page);
 		if ( !empty($this->page_type) )
 		{
 			$header .= "\n" . '<meta name="pwamp-page-type" content="' . $this->page_type . '" />';
 		}
 
 		$page = preg_replace('/<title>(.*)<\/title>/i', '<title>${1}</title>' . "\n" . $header, $page, 1);
+
+
+		// Remove blank lines.
+		$page = preg_replace('/(^[\r\n]*|[\r\n]+)[\s\t]*[\r\n]+/', "\n", $page);
+
+		// Remove end line spaces.
+		$page = preg_replace('/[\s\t]+[\r\n]/', "\n", $page);
 	}
 }
