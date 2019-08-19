@@ -219,7 +219,7 @@ class PWAMPTranscodingCommon
 		$style = str_replace(array("\r\n", "\r", "\n", "\t", '  ', '   ', '    '), '', $style);
 		$style = preg_replace('/\s*([{}:;,])\s*/i', '${1}', $style);
 		$style = str_replace(';}', '}', $style);
-		$style = preg_replace('/#([a-f0-9])\1([a-f0-9])\2([a-f0-9])\3/i','#$\1\2\3',$style);
+		$style = preg_replace('/#([a-f0-9])\1([a-f0-9])\2([a-f0-9])\3/i','#\\\$\1\2\3',$style);
 		$style = preg_replace('/\s*!important\b\s*/i', '', $style);
 		$style = trim($style);
 
@@ -309,19 +309,15 @@ class PWAMPTranscodingCommon
 		$page = preg_replace('/<amp-install-serviceworker.+>.*<\/amp-install-serviceworker>/isU', '', $page);
 
 		$serviceworker = '<amp-install-serviceworker
-	src="' . $this->home_url . '/' . ( !empty($this->permalink) ? 'pwamp-sw-js' : '?pwamp-sw-js' ) . '"
-	data-iframe-src="' . $this->home_url . '/' . ( !empty($this->permalink) ? 'pwamp-sw-html' : '?pwamp-sw-html' ) . '"
+	src="' . $this->home_url . '/' . ( empty($this->permalink) ? '?' : '' ) . 'pwamp-sw.js"
+	data-iframe-src="' . $this->home_url . '/' . ( empty($this->permalink) ? '?' : '' ) . 'pwamp-sw.html"
 	layout="nodisplay">
 </amp-install-serviceworker>';
 		$page = preg_replace('/<\/body>/i', $serviceworker . "\n" . '</body>', $page, 1);
 
 		// Viewport Width
-		if ( empty($this->viewport_width) )
-		{
-			$viewport_width = '<amp-pixel src="' . $this->home_url . '/?pwamp-viewport-width=VIEWPORT_WIDTH" layout="nodisplay"></amp-pixel>';
-
-			$page = preg_replace('/<\/body>/i', $viewport_width . "\n" . '</body>', $page, 1);
-		}
+		$viewport_width = '<amp-pixel src="' . $this->home_url . '/?pwamp-viewport-width=VIEWPORT_WIDTH" layout="nodisplay"></amp-pixel>';
+		$page = preg_replace('/<\/body>/i', $viewport_width . "\n" . '</body>', $page, 1);
 
 		// Pixel
 		$pattern = '/<noscript><img height="1" width="1".* src="([^"]+)".*\/><\/noscript>/isU';
@@ -504,25 +500,25 @@ class PWAMPTranscodingCommon
 		{
 			foreach ( $matches[1] as $value )
 			{
+				if ( preg_match($pattern2, $value) )
+				{
+					$value = preg_replace($pattern2, ' class="${3}${5} contain"', $value);
+				}
+				else
+				{
+					$value .= ' class="contain"';
+				}
+
+				$value = preg_replace($pattern3, '', $value);
+
 				if ( !preg_match('/ width=(("[^"]*")|(\'[^\']*\'))/i', $value) || !preg_match('/ height=(("[^"]*")|(\'[^\']*\'))/i', $value) )
 				{
-					if ( preg_match($pattern2, $value) )
-					{
-						$value = preg_replace($pattern2, ' class="${3}${5} contain"', $value);
-					}
-					else
-					{
-						$value .= ' class="contain"';
-					}
-
-					$value = preg_replace($pattern3, '', $value);
 					$value .= ' layout="fill"';
 
 					$page = preg_replace($pattern, '<div class="fixed-height-container"><amp-img' . $value . ' /></div>', $page, 1);
 				}
 				else
 				{
-					$value = preg_replace($pattern3, '', $value);
 					$value .= ' layout="intrinsic"';
 
 					$page = preg_replace($pattern, '<div class="revert"><amp-img' . $value . ' /></div>', $page, 1);
@@ -826,7 +822,9 @@ class PWAMPTranscodingCommon
 		}
 
 		// The mandatory tag 'amphtml engine v0.js script' is missing or incorrect.
-		$header .= '<script async src="https://cdn.ampproject.org/v0.js"></script>';
+		$header .= '<link rel="dns-prefetch" href="//cdn.ampproject.org">';
+		$header .= "\n" . '<link rel="preload" as="script" href="https://cdn.ampproject.org/v0.js">';
+		$header .= "\n" . '<script async src="https://cdn.ampproject.org/v0.js"></script>';
 
 		// The mandatory tag 'link rel=canonical' is missing or incorrect.
 		$header .= "\n" . '<link rel="canonical" href="' . $this->canonical . '" />';

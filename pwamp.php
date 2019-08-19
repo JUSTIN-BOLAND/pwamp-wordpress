@@ -3,7 +3,7 @@
 Plugin Name: PWA AMP
 Plugin URI:  https://flexplat.com/pwamp-wordpress/
 Description: Converts WordPress themes into Progressive Web Apps and Accelerated Mobile Pages styles.  For more theme conversion, please visit: https://flexplat.com/pwamp-wordpress/ .
-Version:     3.5.0
+Version:     3.6.0
 Author:      Rickey Gu
 Author URI:  https://flexplat.com
 Text Domain: pwamp
@@ -89,7 +89,7 @@ class PWAMP
 
 			exit();
 		}
-		elseif ( preg_match('/^' . $pattern . '\/\??pwamp-sw-html$/im', $this->page_url) )
+		elseif ( preg_match('/^' . $pattern . '\/\??pwamp-sw\.html$/im', $this->page_url) )
 		{
 			header('Content-Type: text/html; charset=utf-8', true);
 			echo '<!doctype html>
@@ -97,7 +97,7 @@ class PWAMP
 <head>
 <title>Installing service worker...</title>
 <script type=\'text/javascript\'>
-	var swsource = \'' . $this->home_url . '/' . ( !empty($this->permalink) ? 'pwamp-sw-js' : '?pwamp-sw-js' ) . '\';
+	var swsource = \'' . $this->home_url . '/' . ( empty($this->permalink) ? '?' : '' ) . 'pwamp-sw.js\';
 	if ( \'serviceWorker\' in navigator ) {
 		navigator.serviceWorker.register(swsource).then(function(reg) {
 			console.log(\'ServiceWorker scope: \', reg.scope);
@@ -113,7 +113,7 @@ class PWAMP
 
 			exit();
 		}
-		elseif ( preg_match('/^' . $pattern . '\/\??pwamp-sw-js$/im', $this->page_url) )
+		elseif ( preg_match('/^' . $pattern . '\/\??pwamp-sw\.js$/im', $this->page_url) )
 		{
 			header('Content-Type: application/javascript', true);
 			echo 'importScripts(\'.' . $this->plugin_dir . '/pwamp/sw/sw-toolbox.js\');
@@ -123,7 +123,7 @@ toolbox.router.default = toolbox.cacheFirst;';
 		}
 		elseif ( preg_match('/^' . $pattern . '\/\?pwamp-viewport-width=(\d+)$/im', $this->page_url, $matches) )
 		{
-			$viewport_width = $matches[2];
+			$viewport_width = $matches[1];
 
 			setcookie('pwamp_viewport_width', $viewport_width, $this->time+60*60*24*365, COOKIEPATH, COOKIE_DOMAIN);
 
