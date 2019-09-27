@@ -29,7 +29,7 @@ class PWAMPTranscodingCommon
 
 	protected function init($home_url, $data)
 	{
-		$this->style = '.fixed-height-container{position:relative;width:100%;height:300px}amp-img.contain img{object-fit:contain}.revert{all:revert;display:inline}';
+		$this->style = '';
 
 		$this->home_url = $home_url;
 
@@ -111,7 +111,15 @@ class PWAMPTranscodingCommon
 
 	protected function get_style()
 	{
-		if ( !empty($this->style_list[$this->page_type]) )
+		$pattern = str_replace(array('/', '.'), array('\/', '\.'), $this->home_url . '/');
+		$page_url = preg_replace('/^' . $pattern . '/im', '', $this->page_url);
+		$page_url = md5($page_url);
+
+		if ( !empty($this->style_list[$page_url]) )
+		{
+			$this->style .= $this->style_list[$page_url];
+		}
+		elseif ( !empty($this->style_list[$this->page_type]) )
 		{
 			$this->style .= $this->style_list[$this->page_type];
 		}
@@ -231,6 +239,16 @@ class PWAMPTranscodingCommon
 		return $style;
 	}
 
+	protected function add_image_style()
+	{
+		$this->style .= '.fixed-height-container{position:relative;width:100%;height:300px}amp-img.contain img{object-fit:contain}.revert{all:revert;display:inline}';
+	}
+
+	protected function add_sidebar_style()
+	{
+		$this->style .= 'padding:.5rem 1rem;background:#f5f5f5;border:#a7a7a7 1px solid}amp-sidebar,amp-sidebar .submenu{width:100%;height:100%}amp-sidebar .main-menu,amp-sidebar .submenu{overflow:auto}amp-sidebar .submenu{top:0;left:0;position:fixed}amp-sidebar .hide-submenu{visibility:hidden;transform:translateX(-100%)}amp-sidebar .show-submenu{visibility:visible;transform:translateX(0)}amp-sidebar .hide-parent{visibility:hidden}amp-sidebar .truncate{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}amp-sidebar .link-container{display:block;height:44px;line-height:44px;border-bottom:1px solid #f0f0f0;padding:0 1rem}amp-sidebar a{min-width:44px;min-height:44px;text-decoration:none;cursor:pointer}amp-sidebar .submenu-icon{padding-right:44px}amp-sidebar .submenu-icon::after{position:absolute;right:0;height:44px;width:44px;content:\'\';background-size:1rem;background-image:url(\'data:image/svg+xml;utf8, <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M5 3l3.057-3 11.943 12-11.943 12-3.057-3 9-9z"/></svg>\');background-repeat:no-repeat;background-position:center}amp-sidebar .controls{display:flex;height:50px;background:#f0f0f0}amp-sidebar .controls a{display:flex;justify-content:center;align-items:center}amp-sidebar .controls span{line-height:50px;margin:0 auto}amp-sidebar nav>.controls>a:first-of-type{visibility:hidden}amp-sidebar .controls a svg{height:1rem;width:1rem}amp-sidebar .link-icon{float:left;height:44px;margin-right:.75rem}amp-sidebar .link-icon>svg{height:44px}amp-sidebar{background:#fff;color:#232323;fill:#232323;text-transform:uppercase;letter-spacing:.18rem;font-size:.875rem}amp-sidebar a{color:#232323;text-transform:none;letter-spacing:normal}div[class*="-sidebar-mask"]{opacity:.8}amp-sidebar a:hover{text-decoration:underline;fill:#232323}amp-sidebar .view-all{font-style:italic;font-weight:bold}';
+	}
+
 
 	protected function update_image(&$page)
 	{
@@ -305,27 +323,13 @@ class PWAMPTranscodingCommon
 		/*
 			<body></body>
 		*/
-		// Service Workers
-		$page = preg_replace('/<amp-install-serviceworker.+>.*<\/amp-install-serviceworker>/isU', '', $page);
 
-		$serviceworker = '<amp-install-serviceworker
-	src="' . $this->home_url . '/' . ( empty($this->permalink) ? '?' : '' ) . 'pwamp-sw.js"
-	data-iframe-src="' . $this->home_url . '/' . ( empty($this->permalink) ? '?' : '' ) . 'pwamp-sw.html"
-	layout="nodisplay">
-</amp-install-serviceworker>';
-		$page = preg_replace('/<\/body>/i', $serviceworker . "\n" . '</body>', $page, 1);
 
-		// Viewport Width
-		$viewport_width = '<amp-pixel src="' . $this->home_url . '/?pwamp-viewport-width=VIEWPORT_WIDTH" layout="nodisplay"></amp-pixel>';
-		$page = preg_replace('/<\/body>/i', $viewport_width . "\n" . '</body>', $page, 1);
-
-		// Pixel
-		$pattern = '/<noscript><img height="1" width="1".* src="([^"]+)".*\/><\/noscript>/isU';
-		while ( preg_match($pattern, $page, $match) )
-		{
-			$page = preg_replace('/<\/body>/i', '<amp-pixel src="' . $match[1] . '" layout="nodisplay"></amp-pixel>' . "\n" . '</body>', $page, 1);
-			$page = preg_replace($pattern, '', $page, 1);
-		}
+		/*
+			<button></button>
+		*/
+		// The attribute 'href' may not appear in tag 'button'.
+		$page = preg_replace('/<button\b([^>]*) href=(("[^"]*")|(\'[^\']*\'))([^>]*)\s*?>/iU', '<button${1}${5}>', $page);
 
 
 		/*
@@ -808,6 +812,29 @@ class PWAMPTranscodingCommon
 
 			$page = preg_replace('/<amp-textarea\b([^>]*)>(.*)<\/amp-textarea>/isU', '<textarea${1}>${2}</textarea>', $page);
 		}
+
+
+		// Pixel
+		$pattern = '/<noscript><img height="1" width="1".* src="([^"]+)".*\/><\/noscript>/isU';
+		while ( preg_match($pattern, $page, $match) )
+		{
+			$page = preg_replace('/<body\b([^>]*)>/i', '<body${1}>' . "\n" . '<amp-pixel src="' . $match[1] . '" layout="nodisplay"></amp-pixel>', $page, 1);
+			$page = preg_replace($pattern, '', $page, 1);
+		}
+
+		// Viewport Width
+		$viewport_width = '<amp-pixel src="' . $this->home_url . '/?pwamp-viewport-width=VIEWPORT_WIDTH" layout="nodisplay"></amp-pixel>';
+		$page = preg_replace('/<body\b([^>]*)>/i', '<body${1}>' . "\n" . $viewport_width, $page, 1);
+
+		// Service Workers
+		$page = preg_replace('/<amp-install-serviceworker.+>.*<\/amp-install-serviceworker>/isU', '', $page);
+
+		$serviceworker = '<amp-install-serviceworker
+	src="' . $this->home_url . '/' . ( empty($this->permalink) ? '?' : '' ) . 'pwamp-sw.js"
+	data-iframe-src="' . $this->home_url . '/' . ( empty($this->permalink) ? '?' : '' ) . 'pwamp-sw.html"
+	layout="nodisplay">
+</amp-install-serviceworker>';
+		$page = preg_replace('/<body\b([^>]*)>/i', '<body${1}>' . "\n" . $serviceworker, $page, 1);
 
 
 		$pattern = '/<meta\b[^>]* name=(("viewport")|(\'viewport\'))[^>]*\s*?\/?>/iU';

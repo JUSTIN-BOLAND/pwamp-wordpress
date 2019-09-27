@@ -3,9 +3,9 @@ Contributors: rickey29
 Donate link: https://flexplat.com/pwamp-wordpress/
 Tags: wordpress, amp, plugin, google, theme, pwa, accelerated mobile pages, progressive web apps, pwamp, wp
 Requires at least: 4.7
-Tested up to: 5.2.2
+Tested up to: 5.2.3
 Requires PHP: 5.2.4
-Stable tag: 3.6.0
+Stable tag: 3.7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -44,6 +44,10 @@ I use Chrome Lighthouse Extension: https://chrome.google.com/webstore/detail/lig
 
 You can Google to find the solution, for example, this one: https://www.howtogeek.com/196087/how-to-add-websites-to-the-home-screen-on-any-smartphone-or-tablet/ .
 
+= Is there any recommended plugin(s)? =
+
+Adaptive Images for WordPress: https://wordpress.org/plugins/adaptive-images/ .
+
 == Download ==
 1. GitHub: https://github.com/rickey29/pwamp-wordpress
 2. WordPress Plugins Libraries: https://wordpress.org/plugins/pwamp/
@@ -51,27 +55,29 @@ You can Google to find the solution, for example, this one: https://www.howtogee
 == Demo sites ==
 1. https://hestia.flexplat.com/?amp=1
 2. https://hestia-2.flexplat.com/?amp=1
-3. https://illdy.flexplat.com/?amp=1
-4. https://illdy-2.flexplat.com/?amp=1
-5. https://shapely.flexplat.com/?amp=1
-6. https://shapely-2.flexplat.com/?amp=1
-7. https://twentyfifteen.flexplat.com/?amp=1
-8. https://twentyfifteen-2.flexplat.com/?amp=1
-9. https://twentynineteen.flexplat.com/?amp=1
-10. https://twentynineteen-2.flexplat.com/?amp=1
-11. https://twentyseventeen.flexplat.com/?amp=1
-12. https://twentyseventeen-2.flexplat.com/?amp=1
-13. https://twentysixteen.flexplat.com/?amp=1
-14. https://twentysixteen-2.flexplat.com/?amp=1
-15. https://tyche.flexplat.com/?amp=1
-16. https://tyche-2.flexplat.com/?amp=1
-17. https://virtue.flexplat.com/?amp=1
-18. https://virtue-2.flexplat.com/?amp=1
+3. https://shapely.flexplat.com/?amp=1
+4. https://shapely-2.flexplat.com/?amp=1
+5. https://twentyfifteen.flexplat.com/?amp=1
+6. https://twentyfifteen-2.flexplat.com/?amp=1
+7. https://twentynineteen.flexplat.com/?amp=1
+8. https://twentynineteen-2.flexplat.com/?amp=1
+9. https://twentyseventeen.flexplat.com/?amp=1
+10. https://twentyseventeen-2.flexplat.com/?amp=1
+11. https://twentysixteen.flexplat.com/?amp=1
+12. https://twentysixteen-2.flexplat.com/?amp=1
+13. https://tyche.flexplat.com/?amp=1
+14. https://tyche-2.flexplat.com/?amp=1
+15. https://virtue.flexplat.com/?amp=1
+16. https://virtue-2.flexplat.com/?amp=1
 
 == Screenshots ==
 1. https://download.flexplat.com/pwamp-wordpress.png
 
 == Changelog ==
+
+= 3.7.0 =
+(Tue., Sep. 24, 2019)
+* improvement: continue re-test supported web sites
 
 = 3.6.0 =
 (Fri., Aug. 16, 2019)
@@ -150,7 +156,6 @@ None.
 
 == Open Issue ==
 * https://github.com/GoogleChrome/lighthouse/issues/7158
-* https://github.com/GoogleChromeLabs/sw-toolbox/issues/277
 
 == Configuration ==
 None.
