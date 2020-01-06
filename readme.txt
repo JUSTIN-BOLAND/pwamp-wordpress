@@ -1,36 +1,25 @@
-=== PWA AMP ===
+=== PWA+AMP ===
 Contributors: rickey29
 Donate link: https://flexplat.com/pwamp-wordpress/
 Tags: wordpress, amp, plugin, google, theme, pwa, accelerated mobile pages, progressive web apps, pwamp, wp
 Requires at least: 4.7
-Tested up to: 5.2.3
+Tested up to: 5.3.1
 Requires PHP: 5.2.4
-Stable tag: 3.7.0
+Stable tag: 4.0.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Converts WordPress themes into Progressive Web Apps and Accelerated Mobile Pages styles.
+Converts WordPress into Progressive Web Apps and Accelerated Mobile Pages styles.
 
 == Description ==
 
-PWA AMP plugin converts WordPress themes into Progressive Web Apps and Accelerated Mobile Pages styles.  For more theme conversion, please visit: https://flexplat.com/pwamp-wordpress/ .
+PWA+AMP plugin converts WordPress into Progressive Web Apps and Accelerated Mobile Pages styles.  For more theme conversion, please visit: https://flexplat.com/pwamp-wordpress/ .
 
 == Installation ==
 1. Upload the plugin files to the '/wp-content/plugins/pwamp' directory, or install the plugin through the WordPress plugins screen directly.
 2. Activate the plugin through the 'Plugins' screen in WordPress.
-3. End users can now get PWA and AMP style of WordPress from mobile web browser.
-
-If you want to get the style from desktop, enter "https://yoursite.com/?amp=1" in your desktop web browser address bar.  If you want to check/audit your website PWA and AMP status, use PWA and AMP validation tools to do the job.
 
 == Frequently Asked Questions ==
-
-= How to make web browser switch to AMP compliant pages? =
-
-Enter "https://yoursite.com/?amp=1" in your web browser address bar.
-
-= How to make web browser switch to original theme/style pages? =
-
-Enter "https://yoursite.com/?desktop=1" in your web browser address bar.
 
 = How to check my website AMP validation status? =
 
@@ -52,28 +41,18 @@ Adaptive Images for WordPress: https://wordpress.org/plugins/adaptive-images/ .
 1. GitHub: https://github.com/rickey29/pwamp-wordpress
 2. WordPress Plugins Libraries: https://wordpress.org/plugins/pwamp/
 
-== Demo sites ==
-1. https://hestia.flexplat.com/?amp=1
-2. https://hestia-2.flexplat.com/?amp=1
-3. https://shapely.flexplat.com/?amp=1
-4. https://shapely-2.flexplat.com/?amp=1
-5. https://twentyfifteen.flexplat.com/?amp=1
-6. https://twentyfifteen-2.flexplat.com/?amp=1
-7. https://twentynineteen.flexplat.com/?amp=1
-8. https://twentynineteen-2.flexplat.com/?amp=1
-9. https://twentyseventeen.flexplat.com/?amp=1
-10. https://twentyseventeen-2.flexplat.com/?amp=1
-11. https://twentysixteen.flexplat.com/?amp=1
-12. https://twentysixteen-2.flexplat.com/?amp=1
-13. https://tyche.flexplat.com/?amp=1
-14. https://tyche-2.flexplat.com/?amp=1
-15. https://virtue.flexplat.com/?amp=1
-16. https://virtue-2.flexplat.com/?amp=1
-
 == Screenshots ==
 1. https://download.flexplat.com/pwamp-wordpress.png
 
 == Changelog ==
+
+= 4.0.0 =
+(Mon., Jan. 06, 2020)
+* re-architecture
+
+= 3.8.0 =
+(Mon., Oct. 14, 2019)
+* improvement: continue re-test supported web sites
 
 = 3.7.0 =
 (Tue., Sep. 24, 2019)
@@ -156,6 +135,7 @@ None.
 
 == Open Issue ==
 * https://github.com/GoogleChrome/lighthouse/issues/7158
+* https://github.com/SuperPWA/Super-Progressive-Web-Apps/issues/105
 
 == Configuration ==
 None.

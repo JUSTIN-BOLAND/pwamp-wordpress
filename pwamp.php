@@ -1,9 +1,9 @@
 <?php
 /*
-Plugin Name: PWA AMP
+Plugin Name: PWA+AMP
 Plugin URI:  https://flexplat.com/pwamp-wordpress/
-Description: Converts WordPress themes into Progressive Web Apps and Accelerated Mobile Pages styles.  For more theme conversion, please visit: https://flexplat.com/pwamp-wordpress/ .
-Version:     3.7.0
+Description: Converts WordPress into Progressive Web Apps and Accelerated Mobile Pages styles.
+Version:     4.0.0
 Author:      Rickey Gu
 Author URI:  https://flexplat.com
 Text Domain: pwamp
@@ -15,6 +15,7 @@ if ( !defined('ABSPATH') )
 	exit;
 }
 
+require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
 class PWAMP
 {
@@ -58,8 +59,8 @@ class PWAMP
 		$this->permalink = get_option('permalink_structure');
 		$this->plugin_dir_url = plugin_dir_url(__FILE__);
 
-		$this->plugin_dir = str_replace($this->home_url, '', $this->plugin_dir_url);
-		$this->plugin_dir = preg_replace('/\/$/im', '', $this->plugin_dir);
+		$pattern = str_replace(array('/', '.'), array('\/', '\.'), $this->home_url);
+		$this->plugin_dir = preg_replace('/^' . $pattern . '(.+)\/$/im', '${1}', $this->plugin_dir_url);
 		$this->plugin_dir_path = plugin_dir_path(__FILE__);
 	}
 
@@ -123,14 +124,9 @@ toolbox.router.default = toolbox.cacheFirst;';
 		}
 		elseif ( preg_match('/^' . $pattern . '\/\?pwamp-viewport-width=(\d+)$/im', $this->page_url, $matches) )
 		{
-			$viewport_width = $matches[1];
+			$this->viewport_width = $matches[1];
 
-			setcookie('pwamp_viewport_width', $viewport_width, $this->time+60*60*24*365, COOKIEPATH, COOKIE_DOMAIN);
-
-			if ( is_plugin_active('adaptive-images/adaptive-images.php') )
-			{
-				setcookie('resolution', $viewport_width . ',1', 0, '/');
-			}
+			setcookie('pwamp_viewport_width', $this->viewport_width, $this->time+60*60*24*365, COOKIEPATH, COOKIE_DOMAIN);
 
 			exit();
 		}
@@ -140,7 +136,7 @@ toolbox.router.default = toolbox.cacheFirst;';
 	public function get_amphtml()
 	{
 		$parts = parse_url($this->home_url);
-		$args = array('desktop' => false, 'amp' => '1');
+		$args = is_plugin_active('pwamp-detection/pwamp.php') ? array('desktop' => false, 'amp' => '1') : array('desktop' => false);
 		$amphtml = $parts['scheme'] . '://' . $parts['host'] . add_query_arg($args);
 		$amphtml = htmlspecialchars($amphtml);
 
@@ -150,7 +146,7 @@ toolbox.router.default = toolbox.cacheFirst;';
 	private function get_canonical()
 	{
 		$parts = parse_url($this->home_url);
-		$args = array('amp' => false, 'desktop' => '1');
+		$args = is_plugin_active('pwamp-detection/pwamp.php') ? array('amp' => false, 'desktop' => '1') : array('amp' => false);
 		$canonical = $parts['scheme'] . '://' . $parts['host'] . add_query_arg($args);
 		$canonical = htmlspecialchars($canonical);
 
@@ -228,7 +224,7 @@ toolbox.router.default = toolbox.cacheFirst;';
 		$accept = !empty($_SERVER['HTTP_ACCEPT']) ? $_SERVER['HTTP_ACCEPT'] : '';
 		$profile = !empty($_SERVER['HTTP_PROFILE']) ? $_SERVER['HTTP_PROFILE'] : '';
 
-		$detection = new MDetection();
+		$detection = new PWAMPDetection();
 
 		$device = $detection->get_device($user_agent, $accept, $profile);
 
@@ -240,32 +236,21 @@ toolbox.router.default = toolbox.cacheFirst;';
 		$page = preg_replace('/^[\s\t]*<style type="[^"]+" id="[^"]+"><\/style>$/im', '', $this->page);
 
 		$data = array(
-			'page_type' => $this->get_page_type(),
-			'themes_url' => get_template_directory_uri(),
-			'plugins_url' => plugins_url(),
 			'page_url' => $this->page_url,
-			'viewport_width' => $this->viewport_width,
+			'canonical' => $this->get_canonical(),
 			'permalink' => $this->permalink,
+			'page_type' => $this->get_page_type(),
+			'viewport_width' => $this->viewport_width,
 			'plugin_dir_url' => $this->plugin_dir_url,
-			'canonical' => $this->get_canonical()
+			'themes_url' => get_template_directory_uri(),
+			'plugins_url' => plugins_url()
 		);
 
 		$transcoding = new PWAMPTranscoding();
 
-		$transcoding->transcode($page, $this->home_url, $this->theme, $data);
+		$page = $transcoding->transcode($page, $this->home_url, $data, $this->theme);
 
 		return $page;
-	}
-
-
-	public function stylesheet($theme)
-	{
-		return 'twentynineteen';
-	}
-
-	public function template($theme)
-	{
-		return 'twentynineteen';
 	}
 
 
@@ -396,8 +381,6 @@ toolbox.router.default = toolbox.cacheFirst;';
 		}
 
 
-		require_once ABSPATH . 'wp-admin/includes/plugin.php';
-
 		$this->init();
 
 		$this->divert();
@@ -405,22 +388,19 @@ toolbox.router.default = toolbox.cacheFirst;';
 
 		if ( isset($_GET['amp']) || isset($_GET['desktop']) )
 		{
-			$device = !isset($_GET['amp']) ? 'desktop' : 'mobile';
+			$device = !isset($_GET['desktop']) ? 'mobile' : 'desktop';
+		}
+		elseif ( !is_plugin_active('pwamp-detection/pwamp.php') )
+		{
+			$device = 'mobile';
 		}
 		elseif ( !empty($_COOKIE['pwamp_style']) )
 		{
-			$device = $_COOKIE['pwamp_style'] != 'mobile' ? 'desktop' : 'mobile';
+			$device = $_COOKIE['pwamp_style'] != 'desktop' ? 'mobile' : 'desktop';
 		}
 		else
 		{
-			if ( is_plugin_active('pwamp-online/pwamp.php') )
-			{
-				require_once $this->plugin_dir_path . '../pwamp-online/pwamp/detection.php';
-			}
-			else
-			{
-				require_once $this->plugin_dir_path . 'pwamp/detection.php';
-			}
+			require_once $this->plugin_dir_path . '../pwamp-detection/pwamp/detection.php';
 
 			$device = $this->get_device();
 			if ( empty($device) )
@@ -428,12 +408,12 @@ toolbox.router.default = toolbox.cacheFirst;';
 				return;
 			}
 
-			$device = ( $device == 'desktop' || $device == 'desktop-bot' ) ? 'desktop' : 'mobile';
+			$device = ( $device != 'desktop' && $device != 'desktop-bot' ) ? 'mobile' : 'desktop';
 		}
 
 		setcookie('pwamp_style', $device, $this->time+60*60*24*365, COOKIEPATH, COOKIE_DOMAIN);
 
-		if ( $device != 'mobile' )
+		if ( $device == 'desktop' )
 		{
 			add_action('wp_head', array($this, 'get_amphtml'), 0);
 
@@ -443,34 +423,20 @@ toolbox.router.default = toolbox.cacheFirst;';
 
 		if ( is_plugin_active('adaptive-images/adaptive-images.php') )
 		{
-			if ( !empty($_COOKIE['pwamp_viewport_width']) )
+			if ( !empty($this->viewport_width) )
 			{
-				$viewport_width = $_COOKIE['pwamp_viewport_width'];
-				setcookie('resolution', $viewport_width . ',1', 0, '/');
+				setcookie('resolution', $this->viewport_width . ',1', 0, '/');
 			}
 		}
 
 
-		require_once $this->plugin_dir_path . 'pwamp/common.php';
-
-		if ( is_plugin_active('pwamp-extension/pwamp.php') )
-		{
-			require_once $this->plugin_dir_path . '../pwamp-extension/pwamp/transcoding.php';
-		}
-		elseif ( is_plugin_active('pwamp-online/pwamp.php') )
+		if ( is_plugin_active('pwamp-online/pwamp.php') )
 		{
 			require_once $this->plugin_dir_path . '../pwamp-online/pwamp/transcoding.php';
-		}
-		elseif ( is_plugin_active('pwamp-' . $this->theme . '/pwamp.php') )
-		{
-			require_once $this->plugin_dir_path . '../pwamp-' . $this->theme . '/pwamp/transcoding.php';
 		}
 		else
 		{
 			require_once $this->plugin_dir_path . 'pwamp/transcoding.php';
-
-			add_filter('stylesheet', array($this, 'stylesheet'));
-			add_filter('template', array($this, 'template'));
 		}
 
 
