@@ -3,7 +3,7 @@
 Plugin Name: PWA+AMP
 Plugin URI:  https://flexplat.com/pwamp-wordpress/
 Description: Converts WordPress into Progressive Web Apps and Accelerated Mobile Pages styles.
-Version:     4.0.0
+Version:     4.1.0
 Author:      Rickey Gu
 Author URI:  https://flexplat.com
 Text Domain: pwamp
@@ -27,12 +27,14 @@ class PWAMP
 	private $theme = '';
 
 	private $page_url = '';
-	private $viewport_width = '';
 	private $permalink = '';
+	private $viewport_width = '';
 	private $plugin_dir_url = '';
 
 	private $plugin_dir = '';
 	private $plugin_dir_path = '';
+
+	private $amphtml = '';
 
 
 	public function __construct()
@@ -55,13 +57,15 @@ class PWAMP
 
 		$parts = parse_url($this->home_url);
 		$this->page_url = $parts['scheme'] . '://' . $parts['host'] . add_query_arg();
-		$this->viewport_width = !empty($_COOKIE['pwamp_viewport_width']) ? $_COOKIE['pwamp_viewport_width'] : '';
 		$this->permalink = get_option('permalink_structure');
+		$this->viewport_width = !empty($_COOKIE['pwamp_viewport_width']) ? $_COOKIE['pwamp_viewport_width'] : '';
 		$this->plugin_dir_url = plugin_dir_url(__FILE__);
 
 		$pattern = str_replace(array('/', '.'), array('\/', '\.'), $this->home_url);
 		$this->plugin_dir = preg_replace('/^' . $pattern . '(.+)\/$/im', '${1}', $this->plugin_dir_url);
 		$this->plugin_dir_path = plugin_dir_path(__FILE__);
+
+		$this->amphtml = '';
 	}
 
 	private function divert()
@@ -133,24 +137,45 @@ toolbox.router.default = toolbox.cacheFirst;';
 	}
 
 
-	public function get_amphtml()
+	private function get_amphtml()
 	{
 		$parts = parse_url($this->home_url);
-		$args = is_plugin_active('pwamp-detection/pwamp.php') ? array('desktop' => false, 'amp' => '1') : array('desktop' => false);
+		$args = array('desktop' => false, 'amp' => '1');
 		$amphtml = $parts['scheme'] . '://' . $parts['host'] . add_query_arg($args);
 		$amphtml = htmlspecialchars($amphtml);
 
-		echo '<link rel="amphtml" href="' . $amphtml . '" />' . "\n";
+		return $amphtml;
 	}
 
 	private function get_canonical()
 	{
 		$parts = parse_url($this->home_url);
-		$args = is_plugin_active('pwamp-detection/pwamp.php') ? array('amp' => false, 'desktop' => '1') : array('amp' => false);
+		$args = array('amp' => false, 'desktop' => '1');
 		$canonical = $parts['scheme'] . '://' . $parts['host'] . add_query_arg($args);
 		$canonical = htmlspecialchars($canonical);
 
 		return $canonical;
+	}
+
+
+	public function add_amphtml()
+	{
+		echo '<link rel="amphtml" href="' . $this->amphtml . '" />' . "\n";
+	}
+
+	public function add_notification_bar()
+	{
+		echo "\n" . '<script>
+	var pwamp_notification_toggle = function() {
+		var e = document.getElementById(\'pwamp-notification\');
+		if ( e.style.display === \'flex\' || e.style.display === \'\' ) {
+			e.style.display = \'none\';
+		} else {
+			e.style.display = \'flex\'
+		}
+	}
+</script>
+<div style="position:fixed!important;bottom:0;left:0;overflow:hidden!important;background:hsla(0,0%,100%,0.7);z-index:1000;width:100%"><div id="pwamp-notification" style=":root{--space-2:1rem}padding:var(--space-2);display:flex;align-items:center;justify-content:center">' . __('Switch to', 'pwamp') . '&nbsp;<a href="' . $this->amphtml . '">' . __('mobile version', 'pwamp') . '</a>&nbsp;&nbsp;<input type="button" value="' . __('Continue', 'pwamp') . '" style="min-width:80px" onclick="pwamp_notification_toggle();" /></div></div>';
 	}
 
 
@@ -235,6 +260,12 @@ toolbox.router.default = toolbox.cacheFirst;';
 	{
 		$page = preg_replace('/^[\s\t]*<style type="[^"]+" id="[^"]+"><\/style>$/im', '', $this->page);
 
+		$lang = array(
+			'continue' => __('Continue', 'pwamp'),
+			'desktop_version' => __('desktop version', 'pwamp'),
+			'switch_to' => __('Switch to', 'pwamp')
+		);
+
 		$data = array(
 			'page_url' => $this->page_url,
 			'canonical' => $this->get_canonical(),
@@ -242,13 +273,12 @@ toolbox.router.default = toolbox.cacheFirst;';
 			'page_type' => $this->get_page_type(),
 			'viewport_width' => $this->viewport_width,
 			'plugin_dir_url' => $this->plugin_dir_url,
-			'themes_url' => get_template_directory_uri(),
-			'plugins_url' => plugins_url()
+			'lang' => $lang
 		);
 
-		$transcoding = new PWAMPTranscoding();
+		$conversion = new PWAMPConversion();
 
-		$page = $transcoding->transcode($page, $this->home_url, $data, $this->theme);
+		$page = $conversion->convert($page, $this->home_url, $data, $this->theme);
 
 		return $page;
 	}
@@ -390,17 +420,13 @@ toolbox.router.default = toolbox.cacheFirst;';
 		{
 			$device = !isset($_GET['desktop']) ? 'mobile' : 'desktop';
 		}
-		elseif ( !is_plugin_active('pwamp-detection/pwamp.php') )
-		{
-			$device = 'mobile';
-		}
 		elseif ( !empty($_COOKIE['pwamp_style']) )
 		{
 			$device = $_COOKIE['pwamp_style'] != 'desktop' ? 'mobile' : 'desktop';
 		}
 		else
 		{
-			require_once $this->plugin_dir_path . '../pwamp-detection/pwamp/detection.php';
+			require_once $this->plugin_dir_path . 'pwamp/detection.php';
 
 			$device = $this->get_device();
 			if ( empty($device) )
@@ -415,7 +441,10 @@ toolbox.router.default = toolbox.cacheFirst;';
 
 		if ( $device == 'desktop' )
 		{
-			add_action('wp_head', array($this, 'get_amphtml'), 0);
+			$this->amphtml = $this->get_amphtml();
+
+			add_action('wp_head', array($this, 'add_amphtml'), 0);
+			add_action('wp_footer', array($this, 'add_notification_bar'), 1000);
 
 			return;
 		}
@@ -432,11 +461,11 @@ toolbox.router.default = toolbox.cacheFirst;';
 
 		if ( is_plugin_active('pwamp-online/pwamp.php') )
 		{
-			require_once $this->plugin_dir_path . '../pwamp-online/pwamp/transcoding.php';
+			require_once $this->plugin_dir_path . '../pwamp-online/pwamp/conversion.php';
 		}
 		else
 		{
-			require_once $this->plugin_dir_path . 'pwamp/transcoding.php';
+			require_once $this->plugin_dir_path . 'pwamp/conversion.php';
 		}
 
 
