@@ -35,7 +35,7 @@ class PWAMPConversion
 		$transcoding->init($home_url, $data);
 
 
-		$page = $transcoding->pretranscode_theme($page);
+		$page = $transcoding->pretranscode_theme($page, $theme);
 
 		if ( method_exists($transcoding, 'pretranscode_extension') )
 		{
@@ -46,7 +46,7 @@ class PWAMPConversion
 		$page = $transcoding->transcode_html($page);
 
 
-		$page = $transcoding->transcode_theme($page);
+		$page = $transcoding->transcode_theme($page, $theme);
 
 		if ( method_exists($transcoding, 'transcode_extension') )
 		{
@@ -57,7 +57,7 @@ class PWAMPConversion
 		$page = $transcoding->transcode_head($page);
 
 
-		$page = $transcoding->posttranscode_theme($page);
+		$page = $transcoding->posttranscode_theme($page, $theme);
 
 		if ( method_exists($transcoding, 'posttranscode_extension') )
 		{

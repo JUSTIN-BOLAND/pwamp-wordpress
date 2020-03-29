@@ -16,17 +16,17 @@ class PWAMPThemes extends PWAMPTranscoding
 	}
 
 
-	public function pretranscode_theme($page)
+	public function pretranscode_theme($page, $theme)
 	{
 		return $page;
 	}
 
-	public function transcode_theme($page)
+	public function transcode_theme($page, $theme)
 	{
 		return $page;
 	}
 
-	public function posttranscode_theme($page)
+	public function posttranscode_theme($page, $theme)
 	{
 		return $page;
 	}

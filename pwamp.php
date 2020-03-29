@@ -3,7 +3,7 @@
 Plugin Name: PWA+AMP
 Plugin URI:  https://flexplat.com/pwamp-wordpress/
 Description: Converts WordPress into Progressive Web Apps and Accelerated Mobile Pages styles.
-Version:     4.1.0
+Version:     4.2.0
 Author:      Rickey Gu
 Author URI:  https://flexplat.com
 Text Domain: pwamp
@@ -34,8 +34,6 @@ class PWAMP
 	private $plugin_dir = '';
 	private $plugin_dir_path = '';
 
-	private $amphtml = '';
-
 
 	public function __construct()
 	{
@@ -64,8 +62,6 @@ class PWAMP
 		$pattern = str_replace(array('/', '.'), array('\/', '\.'), $this->home_url);
 		$this->plugin_dir = preg_replace('/^' . $pattern . '(.+)\/$/im', '${1}', $this->plugin_dir_url);
 		$this->plugin_dir_path = plugin_dir_path(__FILE__);
-
-		$this->amphtml = '';
 	}
 
 	private function divert()
@@ -126,11 +122,11 @@ toolbox.router.default = toolbox.cacheFirst;';
 
 			exit();
 		}
-		elseif ( preg_match('/^' . $pattern . '\/\?pwamp-viewport-width=(\d+)$/im', $this->page_url, $matches) )
+		elseif ( preg_match('/^' . $pattern . '\/\?pwamp-viewport-width=(\d+)$/im', $this->page_url, $match) )
 		{
-			$this->viewport_width = $matches[1];
+			$this->viewport_width = $match[1];
 
-			setcookie('pwamp_viewport_width', $this->viewport_width, $this->time+60*60*24*365, COOKIEPATH, COOKIE_DOMAIN);
+			setcookie('pwamp_viewport_width', $this->viewport_width, $this->time + 60*60*24*365, COOKIEPATH, COOKIE_DOMAIN);
 
 			exit();
 		}
@@ -160,11 +156,15 @@ toolbox.router.default = toolbox.cacheFirst;';
 
 	public function add_amphtml()
 	{
-		echo '<link rel="amphtml" href="' . $this->amphtml . '" />' . "\n";
+		$amphtml = $this->get_amphtml();
+
+		echo '<link rel="amphtml" href="' . $amphtml . '" />' . "\n";
 	}
 
 	public function add_notification_bar()
 	{
+		$amphtml = $this->get_amphtml();
+
 		echo "\n" . '<script>
 	var pwamp_notification_toggle = function() {
 		var e = document.getElementById(\'pwamp-notification\');
@@ -175,7 +175,9 @@ toolbox.router.default = toolbox.cacheFirst;';
 		}
 	}
 </script>
-<div style="position:fixed!important;bottom:0;left:0;overflow:hidden!important;background:hsla(0,0%,100%,0.7);z-index:1000;width:100%"><div id="pwamp-notification" style=":root{--space-2:1rem}padding:var(--space-2);display:flex;align-items:center;justify-content:center">' . __('Switch to', 'pwamp') . '&nbsp;<a href="' . $this->amphtml . '">' . __('mobile version', 'pwamp') . '</a>&nbsp;&nbsp;<input type="button" value="' . __('Continue', 'pwamp') . '" style="min-width:80px" onclick="pwamp_notification_toggle();" /></div></div>';
+<div style="position:fixed!important;bottom:0;left:0;overflow:hidden!important;background:hsla(0,0%,100%,0.7);z-index:1000;width:100%">
+	<div id="pwamp-notification" style="display:flex;align-items:center;justify-content:center">' . __('Switch to', 'pwamp') . '&nbsp;<a href="' . $amphtml . '">' . __('mobile version', 'pwamp') . '</a>&nbsp;&nbsp;<input type="button" value="' . __('Continue', 'pwamp') . '" style="min-width:80px" onclick="pwamp_notification_toggle();" /></div>
+</div>';
 	}
 
 
@@ -256,11 +258,11 @@ toolbox.router.default = toolbox.cacheFirst;';
 		return $device;
 	}
 
-	private function transcode_page()
+	private function transcode_page($page)
 	{
-		$page = preg_replace('/^[\s\t]*<style type="[^"]+" id="[^"]+"><\/style>$/im', '', $this->page);
+		$page = preg_replace('/^[\s\t]*<style type="[^"]+" id="[^"]+"><\/style>$/im', '', $page);
 
-		$lang = array(
+		$language = array(
 			'continue' => __('Continue', 'pwamp'),
 			'desktop_version' => __('desktop version', 'pwamp'),
 			'switch_to' => __('Switch to', 'pwamp')
@@ -273,7 +275,7 @@ toolbox.router.default = toolbox.cacheFirst;';
 			'page_type' => $this->get_page_type(),
 			'viewport_width' => $this->viewport_width,
 			'plugin_dir_url' => $this->plugin_dir_url,
-			'lang' => $lang
+			'language' => $language
 		);
 
 		$conversion = new PWAMPConversion();
@@ -300,20 +302,20 @@ toolbox.router.default = toolbox.cacheFirst;';
 
 
 		$message = $_COOKIE['pwamp_message'];
-		setcookie('pwamp_message', '', $this->time-1, COOKIEPATH, COOKIE_DOMAIN);
+		setcookie('pwamp_message', '', $this->time - 1, COOKIEPATH, COOKIE_DOMAIN);
 
 		$title = '';
 		if ( !empty($_COOKIE['pwamp_title']) )
 		{
 			$title = $_COOKIE['pwamp_title'];
-			setcookie('pwamp_title', '', $this->time-1, COOKIEPATH, COOKIE_DOMAIN);
+			setcookie('pwamp_title', '', $this->time - 1, COOKIEPATH, COOKIE_DOMAIN);
 		}
 
 		$args = array();
 		if ( !empty($_COOKIE['pwamp_args']) )
 		{
 			$args = json_decode(stripslashes($_COOKIE['pwamp_args']));
-			setcookie('pwamp_args', '', $this->time-1, COOKIEPATH, COOKIE_DOMAIN);
+			setcookie('pwamp_args', '', $this->time - 1, COOKIEPATH, COOKIE_DOMAIN);
 		}
 
 		_default_wp_die_handler($message, $title, $args);
@@ -321,7 +323,7 @@ toolbox.router.default = toolbox.cacheFirst;';
 
 	public function shutdown()
 	{
-		$page = $this->transcode_page();
+		$page = $this->transcode_page($this->page);
 		if ( empty($page) )
 		{
 			echo $this->page;
@@ -374,24 +376,24 @@ toolbox.router.default = toolbox.cacheFirst;';
 		}
 
 
-		setcookie('pwamp_message', $message, $this->time+60, COOKIEPATH, COOKIE_DOMAIN);
+		setcookie('pwamp_message', $message, $this->time + 60, COOKIEPATH, COOKIE_DOMAIN);
 
 		if ( !empty($title) )
 		{
-			setcookie('pwamp_title', $title, $this->time+60, COOKIEPATH, COOKIE_DOMAIN);
+			setcookie('pwamp_title', $title, $this->time + 60, COOKIEPATH, COOKIE_DOMAIN);
 		}
 		else
 		{
-			setcookie('pwamp_title', '', $this->time-1, COOKIEPATH, COOKIE_DOMAIN);
+			setcookie('pwamp_title', '', $this->time - 1, COOKIEPATH, COOKIE_DOMAIN);
 		}
 
 		if ( !empty($args) )
 		{
-			setcookie('pwamp_args', json_encode($args), $this->time+60, COOKIEPATH, COOKIE_DOMAIN);
+			setcookie('pwamp_args', json_encode($args), $this->time + 60, COOKIEPATH, COOKIE_DOMAIN);
 		}
 		else
 		{
-			setcookie('pwamp_args', '', $this->time-1, COOKIEPATH, COOKIE_DOMAIN);
+			setcookie('pwamp_args', '', $this->time - 1, COOKIEPATH, COOKIE_DOMAIN);
 		}
 
 		$this->json_redirect($this->home_url);
@@ -429,20 +431,15 @@ toolbox.router.default = toolbox.cacheFirst;';
 			require_once $this->plugin_dir_path . 'pwamp/detection.php';
 
 			$device = $this->get_device();
-			if ( empty($device) )
-			{
-				return;
-			}
 
 			$device = ( $device != 'desktop' && $device != 'desktop-bot' ) ? 'mobile' : 'desktop';
 		}
 
-		setcookie('pwamp_style', $device, $this->time+60*60*24*365, COOKIEPATH, COOKIE_DOMAIN);
+		setcookie('pwamp_style', $device, $this->time + 60*60*24*365, COOKIEPATH, COOKIE_DOMAIN);
+
 
 		if ( $device == 'desktop' )
 		{
-			$this->amphtml = $this->get_amphtml();
-
 			add_action('wp_head', array($this, 'add_amphtml'), 0);
 			add_action('wp_footer', array($this, 'add_notification_bar'), 1000);
 

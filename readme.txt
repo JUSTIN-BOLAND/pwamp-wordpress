@@ -5,7 +5,7 @@ Tags: wordpress, amp, plugin, google, theme, pwa, accelerated mobile pages, prog
 Requires at least: 4.7
 Tested up to: 5.3.2
 Requires PHP: 5.2.4
-Stable tag: 4.1.0
+Stable tag: 4.2.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -45,6 +45,10 @@ Adaptive Images for WordPress: https://wordpress.org/plugins/adaptive-images/ .
 1. https://download.flexplat.com/pwamp-wordpress.png
 
 == Changelog ==
+
+= 4.2.0 =
+(Sun., Mar. 29, 2020)
+* re-architecture continue
 
 = 4.1.0 =
 (Sat., Feb. 29, 2020)
