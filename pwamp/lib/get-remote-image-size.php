@@ -11,10 +11,10 @@ function get_image_size($url)
 	curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
 	curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
 	curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-	curl_setopt($curl, CURLOPT_MAXREDIRS, 10);
-	curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 9);
+	curl_setopt($curl, CURLOPT_MAXREDIRS, 3);
+	curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 3);
 	curl_setopt($curl, CURLOPT_REFERER, $url);
-	curl_setopt($curl, CURLOPT_TIMEOUT, 60);
+	curl_setopt($curl, CURLOPT_TIMEOUT, 5);
 	curl_setopt($curl, CURLOPT_AUTOREFERER, TRUE);
 	curl_setopt($curl, CURLOPT_ENCODING, 'gzip,deflate');
 

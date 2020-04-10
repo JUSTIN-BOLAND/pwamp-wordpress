@@ -27,12 +27,12 @@ function get_remote_data($url, $post_paramtrs=false,            $extra=array('sc
 		$headers[]= "User-Agent: Mozilla/5.0 (Windows NT 6.1; rv:76.0) Gecko/20100101 Firefox/76.0";	 $headers[]= "Pragma: ";  $headers[]= "Cache-Control: max-age=0";
 		if (!empty($post_paramtrs) && !is_array($post_paramtrs) && is_object(json_decode($post_paramtrs))){ $headers[]= 'Content-Type: application/json'; $headers[]= 'Content-Length: '.strlen($post_paramtrs); }
 	curl_setopt($c, CURLOPT_HTTPHEADER, $headers);
-	curl_setopt($c, CURLOPT_MAXREDIRS, 10); 
+	curl_setopt($c, CURLOPT_MAXREDIRS, 3); 
 	//if SAFE_MODE or OPEN_BASEDIR is set,then FollowLocation cant be used.. so...
 	$follow_allowed= ( ini_get('open_basedir') || ini_get('safe_mode')) ? false:true;  if ($follow_allowed){curl_setopt($c, CURLOPT_FOLLOWLOCATION, 1);}
-	curl_setopt($c, CURLOPT_CONNECTTIMEOUT, 9);
+	curl_setopt($c, CURLOPT_CONNECTTIMEOUT, 3);
 	curl_setopt($c, CURLOPT_REFERER, $url);    
-	curl_setopt($c, CURLOPT_TIMEOUT, 60);
+	curl_setopt($c, CURLOPT_TIMEOUT, 5);
 	curl_setopt($c, CURLOPT_AUTOREFERER, true);
 	curl_setopt($c, CURLOPT_ENCODING, 'gzip,deflate');
 	curl_setopt($c, CURLOPT_HEADER, !empty($extra['return_array']));
