@@ -3,9 +3,9 @@ Contributors: rickey29
 Donate link: https://flexplat.com/pwamp-wordpress/
 Tags: wordpress, amp, plugin, google, theme, pwa, accelerated mobile pages, progressive web apps, pwamp, wp, amphtml, mobile, performance, speed, seo, adaptive images
 Requires at least: 4.7
-Tested up to: 5.4
+Tested up to: 5.4.1
 Requires PHP: 5.2.4
-Stable tag: 4.3.0
+Stable tag: 4.4.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -15,9 +15,33 @@ Converts WordPress into Progressive Web Apps and Accelerated Mobile Pages styles
 
 PWA+AMP plugin converts WordPress into Progressive Web Apps and Accelerated Mobile Pages styles.
 
+== Highlight ==
+AMP can only work based on HTTPS -- you need to update your server to support SSL/HTTPS.
+
+== Open Issue ==
+1. https://github.com/GoogleChrome/lighthouse/issues/7158
+2. https://github.com/SuperPWA/Super-Progressive-Web-Apps/issues/105
+
+== Demo ==
+1. https://pwamp-wordpress.flexplat.com/
+2. https://pwamp-wordpress-2.flexplat.com/
+
+== Screenshots ==
+1. https://download.flexplat.com/pwamp-wordpress.jpg
+
+== Download ==
+1. GitHub: https://github.com/rickey29/pwamp-wordpress
+2. WordPress Plugins Libraries: https://wordpress.org/plugins/pwamp/
+
 == Installation ==
 1. Upload the plugin files to the '/wp-content/plugins/pwamp' directory, or install the plugin through the WordPress plugins screen directly.
 2. Activate the plugin through the 'Plugins' screen in WordPress.
+
+== Configuration ==
+None.
+
+== Upgrade Notice ==
+None.
 
 == Frequently Asked Questions ==
 
@@ -37,14 +61,11 @@ You can Google to find the solution, for example, this one: https://www.howtogee
 
 Adaptive Images for WordPress: https://wordpress.org/plugins/adaptive-images/ .
 
-== Download ==
-1. GitHub: https://github.com/rickey29/pwamp-wordpress
-2. WordPress Plugins Libraries: https://wordpress.org/plugins/pwamp/
-
-== Screenshots ==
-1. https://download.flexplat.com/pwamp-wordpress.png
-
 == Changelog ==
+
+= 4.4.0 =
+(Thur., Apr. 30, 2020)
+* code optimization
 
 = 4.3.0 =
 (Fri., Apr. 10, 2020)
@@ -138,19 +159,6 @@ Adaptive Images for WordPress: https://wordpress.org/plugins/adaptive-images/ .
 = 1.0.0 =
 (Sun., Feb. 18, 2018)
 * primary development
-
-== Upgrade Notice ==
-None.
-
-== Highlight ==
-None.
-
-== Open Issue ==
-* https://github.com/GoogleChrome/lighthouse/issues/7158
-* https://github.com/SuperPWA/Super-Progressive-Web-Apps/issues/105
-
-== Configuration ==
-None.
 
 == Support ==
 Author: Rickey Gu
