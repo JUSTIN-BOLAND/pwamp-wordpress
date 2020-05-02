@@ -118,7 +118,7 @@ class PWAMPThemes extends PWAMPTranscoding
 </a>
 </div>';
 
-		$match = preg_replace_callback('/({((?:[^{}]+|(?1))*)})/isU', array($this, 'menu_ul_callback'), $match);
+		$match = preg_replace_callback('/({((?:[^{}]+|(?1))*)})/i', array($this, 'menu_ul_callback'), $match);
 
 		$this->sidebar .= "\n" . '</div>';
 
@@ -131,7 +131,7 @@ class PWAMPThemes extends PWAMPTranscoding
 
 		$match = str_replace(array('<ul', '/ul>', '<li', '/li>'), array('{', '}', '[', ']'), $match);
 
-		$match = preg_replace_callback('/({((?:[^{}]+|(?1))*)})/isU', array($this, 'menu_ul_callback'), $match);
+		$match = preg_replace_callback('/({((?:[^{}]+|(?1))*)})/i', array($this, 'menu_ul_callback'), $match);
 
 		return '';
 	}
@@ -142,7 +142,7 @@ class PWAMPThemes extends PWAMPTranscoding
 
 		$this->level .= '_0';
 
-		$match = preg_replace_callback('/(\[((?:[^\[\]]+|(?1))*)\])/isU', array($this, 'menu_li_callback'), $match);
+		$match = preg_replace_callback('/(\[((?:[^\[\]]+|(?1))*)\])/i', array($this, 'menu_li_callback'), $match);
 
 		$this->level = preg_replace('/_\d+$/im', '', $this->level);
 
