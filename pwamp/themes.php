@@ -29,7 +29,7 @@ class PWAMPThemes extends PWAMPTranscoding
 		$this->sidebar = trim($this->sidebar);
 
 		$body = '<body' . $match . '>
-<amp-sidebar id="header-sidebar" side="left" layout="nodisplay">
+<amp-sidebar id="pwamp-sidebar" side="left" layout="nodisplay">
 <nav>
 <div class="controls" [class]="hide ? \'controls hide-parent\' : \'controls\'" aria-label="' . $this->menu . ' controls">
 <a tabindex="0" role="button" aria-label="">
@@ -38,7 +38,7 @@ class PWAMPThemes extends PWAMPTranscoding
 </svg>
 </a>
 <span class="truncate">' . $this->menu . '</span>
-<a tabindex="0" role="button" on="tap:header-sidebar.toggle" aria-label="Close ' . $this->menu . '">
+<a tabindex="0" role="button" on="tap:pwamp-sidebar.toggle" aria-label="Close ' . $this->menu . '">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
 <path d="M24 20.188l-8.315-8.209 8.2-8.282-3.697-3.697-8.212 8.318-8.31-8.203-3.666 3.666 8.321 8.24-8.206 8.313 3.666 3.666 8.237-8.318 8.285 8.203z"/>
 </svg>
@@ -111,7 +111,7 @@ class PWAMPThemes extends PWAMPTranscoding
 </svg>
 </a>
 <span class="truncate">' . $label . '</span>
-<a tabindex="0" role="button" on="tap:header-sidebar.toggle" aria-label="Close ' . $label . '">
+<a tabindex="0" role="button" on="tap:pwamp-sidebar.toggle" aria-label="Close ' . $label . '">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
 <path d="M24 20.188l-8.315-8.209 8.2-8.282-3.697-3.697-8.212 8.318-8.31-8.203-3.666 3.666 8.321 8.24-8.206 8.313 3.666 3.666 8.237-8.318 8.285 8.203z"/>
 </svg>
@@ -151,7 +151,7 @@ class PWAMPThemes extends PWAMPTranscoding
 
 	private function search_button_callback($matches)
 	{
-		$hamburger = '<div class="toggle nav-toggle mobile-nav-toggle" role="button" aria-label="mobile menu" on="tap:header-sidebar.toggle" tabindex="0">' . $this->hamburger . '</div>';
+		$hamburger = '<div class="toggle nav-toggle mobile-nav-toggle" role="button" aria-label="mobile menu" on="tap:pwamp-sidebar.toggle" tabindex="0">' . $this->hamburger . '</div>';
 
 		return $hamburger;
 	}

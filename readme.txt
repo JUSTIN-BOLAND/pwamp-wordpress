@@ -5,7 +5,7 @@ Tags: wordpress, amp, plugin, google, theme, pwa, accelerated mobile pages, prog
 Requires at least: 4.7
 Tested up to: 5.4.1
 Requires PHP: 5.2.4
-Stable tag: 4.5.0
+Stable tag: 4.6.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -62,6 +62,10 @@ You can Google to find the solution, for example, this one: https://www.howtogee
 Adaptive Images for WordPress: https://wordpress.org/plugins/adaptive-images/ .
 
 == Changelog ==
+
+= 4.6.0 =
+(Wed., May 06, 2020)
+* bug fix: menu sidebar some elements are not display
 
 = 4.5.0 =
 (Sat., May 01, 2020)
