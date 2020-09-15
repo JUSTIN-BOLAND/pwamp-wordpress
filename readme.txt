@@ -1,33 +1,30 @@
 === PWA+AMP ===
 Contributors: rickey29
-Donate link: https://flexplat.com/pwamp-wordpress/
+Donate link: https://flexplat.com
 Tags: wordpress, amp, plugin, google, theme, pwa, accelerated mobile pages, progressive web apps, pwamp, wp, amphtml, mobile, performance, speed, seo, adaptive images
 Requires at least: 4.7
-Tested up to: 5.4.1
+Tested up to: 5.5.1
 Requires PHP: 5.2.4
-Stable tag: 4.6.0
+Stable tag: 5.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Converts WordPress into Progressive Web Apps and Accelerated Mobile Pages styles.
 
 == Description ==
-
 PWA+AMP plugin converts WordPress into Progressive Web Apps and Accelerated Mobile Pages styles.
 
 == Highlight ==
 AMP can only work based on HTTPS -- you need to update your server to support SSL/HTTPS.
 
 == Open Issue ==
-1. https://github.com/GoogleChrome/lighthouse/issues/7158
-2. https://github.com/SuperPWA/Super-Progressive-Web-Apps/issues/105
+None.
 
 == Demo ==
-1. https://pwamp-wordpress.flexplat.com/
-2. https://pwamp-wordpress-2.flexplat.com/
+1. https://pwamp-wordpress.flexplat.com
 
 == Screenshots ==
-1. https://download.flexplat.com/pwamp-wordpress.jpg
+1. https://download.flexplat.com/pwamp-wordpress.png
 
 == Download ==
 1. GitHub: https://github.com/rickey29/pwamp-wordpress
@@ -57,11 +54,11 @@ I use Chrome Lighthouse Extension: https://chrome.google.com/webstore/detail/lig
 
 You can Google to find the solution, for example, this one: https://www.howtogeek.com/196087/how-to-add-websites-to-the-home-screen-on-any-smartphone-or-tablet/ .
 
-= Is there any recommended plugin(s)? =
-
-Adaptive Images for WordPress: https://wordpress.org/plugins/adaptive-images/ .
-
 == Changelog ==
+
+= 5.5.0 =
+(Mon., Sep. 14, 2020)
+* re-architecture
 
 = 4.6.0 =
 (Wed., May 06, 2020)

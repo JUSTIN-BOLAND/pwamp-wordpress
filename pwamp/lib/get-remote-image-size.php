@@ -6,16 +6,16 @@ function get_image_size($url)
 	$curl = curl_init();
 
 	curl_setopt($curl, CURLOPT_URL, $url);
-	curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
-	curl_setopt($curl, CURLOPT_FOLLOWLOCATION, TRUE);
+	curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
 	curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
-	curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
+	curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
 	curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
 	curl_setopt($curl, CURLOPT_MAXREDIRS, 3);
 	curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 3);
 	curl_setopt($curl, CURLOPT_REFERER, $url);
 	curl_setopt($curl, CURLOPT_TIMEOUT, 5);
-	curl_setopt($curl, CURLOPT_AUTOREFERER, TRUE);
+	curl_setopt($curl, CURLOPT_AUTOREFERER, true);
 	curl_setopt($curl, CURLOPT_ENCODING, 'gzip,deflate');
 
 	$raw = curl_exec($curl);

@@ -20,7 +20,7 @@ function get_remote_data($url, $post_paramtrs=false,            $extra=array('sc
 	curl_setopt($c, CURLOPT_URL, $url);
 	curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
 	//if parameters were passed to this function, then transform into POST method.. (if you need GET request, then simply change the passed URL)
-	if($post_paramtrs){ curl_setopt($c, CURLOPT_POST,TRUE);  curl_setopt($c, CURLOPT_POSTFIELDS, (is_array($post_paramtrs)? http_build_query($post_paramtrs) : $post_paramtrs) ); }
+	if($post_paramtrs){ curl_setopt($c, CURLOPT_POST,true);  curl_setopt($c, CURLOPT_POSTFIELDS, (is_array($post_paramtrs)? http_build_query($post_paramtrs) : $post_paramtrs) ); }
 	curl_setopt($c, CURLOPT_SSL_VERIFYHOST,false); 
 	curl_setopt($c, CURLOPT_SSL_VERIFYPEER,false);
 	curl_setopt($c, CURLOPT_COOKIE, 'CookieName1=Value;'); 

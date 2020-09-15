@@ -15,53 +15,42 @@ class PWAMPConversion
 	}
 
 
-	public function convert($page, $home_url, $data, $theme)
+	public function convert($page, $home_url, $data, $theme, $active_plugins)
 	{
 		require_once plugin_dir_path(__FILE__) . 'transcoding.php';
-		require_once plugin_dir_path(__FILE__) . 'themes.php';
+
+		$transcoding = new PWAMPTranscoding();
+
+		$transcoding->init($home_url, $data);
+
 
 		if ( is_plugin_active('pwamp-extension/pwamp.php') )
 		{
 			require_once plugin_dir_path(__FILE__) . '../../pwamp-extension/pwamp/extension.php';
 
-			$transcoding = new PWAMPExtension();
+			$extension = new PWAMPExtension();
+
+			$extension->init($transcoding);
 		}
-		else
+
+
+		if ( !empty($extension) )
 		{
-			$transcoding = new PWAMPThemes();
+			$page = $extension->pretranscode($page);
 		}
-
-
-		$transcoding->init($home_url, $data);
-
-
-		$page = $transcoding->pretranscode_theme($page, $theme);
-
-		if ( method_exists($transcoding, 'pretranscode_extension') )
-		{
-			$page = $transcoding->pretranscode_extension($page);
-		}
-
 
 		$page = $transcoding->transcode_html($page);
 
-
-		$page = $transcoding->transcode_theme($page, $theme);
-
-		if ( method_exists($transcoding, 'transcode_extension') )
+		if ( !empty($extension) )
 		{
-			$page = $transcoding->transcode_extension($page);
+			$page = $extension->transcode($page);
 		}
-
 
 		$page = $transcoding->transcode_head($page);
 
-
-		$page = $transcoding->posttranscode_theme($page, $theme);
-
-		if ( method_exists($transcoding, 'posttranscode_extension') )
+		if ( !empty($extension) )
 		{
-			$page = $transcoding->posttranscode_extension($page);
+			$page = $extension->posttranscode($page);
 		}
 
 		return $page;
