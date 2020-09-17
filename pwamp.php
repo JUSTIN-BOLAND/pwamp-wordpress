@@ -3,7 +3,7 @@
 Plugin Name: PWA+AMP
 Plugin URI:  https://flexplat.com
 Description: Converts WordPress into Progressive Web Apps and Accelerated Mobile Pages styles.
-Version:     5.0
+Version:     5.1
 Author:      Rickey Gu
 Author URI:  https://flexplat.com
 Text Domain: pwamp
@@ -19,6 +19,15 @@ require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
 class PWAMP
 {
+	private $font_server_list = array(
+		'cloud.typography.com',
+		'fast.fonts.net',
+		'fonts.googleapis.com',
+		'use.typekit.net',
+		'maxcdn.bootstrapcdn.com',
+		'use.fontawesome.com'
+	);
+
 	private $time_now = 0;
 
 	private $home_url = '';
@@ -38,6 +47,8 @@ class PWAMP
 
 	private $plugin_dir = '';
 	private $plugin_dir_path = '';
+
+	private $base_url = '';
 
 
 	public function __construct()
@@ -76,6 +87,8 @@ class PWAMP
 
 		$this->plugin_dir = preg_replace('/^' . $this->home_url_pattern . '(.+)\/$/im', '${1}', $this->plugin_dir_url);
 		$this->plugin_dir_path = plugin_dir_path(__FILE__);
+
+		$this->base_url = '';
 	}
 
 	private function divert()
@@ -274,6 +287,173 @@ toolbox.router.default = toolbox.cacheFirst;';
 	}
 
 
+	private function update_url($url, $base_url = '')
+	{
+		if ( empty($base_url) )
+		{
+			$base_url = $this->home_url . '/';
+		}
+
+		if ( preg_match('/^https?:\/\//im', $url) )
+		{
+			$url = preg_replace('/^http:\/\//im', 'https://', $url);
+		}
+		elseif ( preg_match('/^\/\//im', $url) )
+		{
+			$url = 'https:' . $url;
+		}
+		elseif ( preg_match('/^\//im', $url) )
+		{
+			$url = $this->host_url . $url;
+		}
+		elseif ( preg_match('/^\.\.\/\.\.\/\.\.\/\.\.\//im', $url) )
+		{
+			$base_url = preg_replace('/[^\/]+\/[^\/]+\/[^\/]+\/[^\/]+\/[^\/]*$/im', '', $base_url);
+
+			$url = preg_replace('/^\.\.\/\.\.\/\.\.\/\.\.\//im', '', $url);
+			$url = $base_url . $url;
+		}
+		elseif ( preg_match('/^\.\.\/\.\.\/\.\.\//im', $url) )
+		{
+			$base_url = preg_replace('/[^\/]+\/[^\/]+\/[^\/]+\/[^\/]*$/im', '', $base_url);
+
+			$url = preg_replace('/^\.\.\/\.\.\/\.\.\//im', '', $url);
+			$url = $base_url . $url;
+		}
+		elseif ( preg_match('/^\.\.\/\.\.\//im', $url) )
+		{
+			$base_url = preg_replace('/[^\/]+\/[^\/]+\/[^\/]*$/im', '', $base_url);
+
+			$url = preg_replace('/^\.\.\/\.\.\//im', '', $url);
+			$url = $base_url . $url;
+		}
+		elseif ( preg_match('/^\.\.\//im', $url) )
+		{
+			$base_url = preg_replace('/[^\/]+\/[^\/]*$/im', '', $base_url);
+
+			$url = preg_replace('/^\.\.\//im', '', $url);
+			$url = $base_url . $url;
+		}
+		elseif ( preg_match('/^\.\//im', $url) )
+		{
+			$base_url = preg_replace('/[^\/]*$/im', '', $base_url);
+
+			$url = preg_replace('/^\.\//im', '', $url);
+			$url = $base_url . $url;
+		}
+		else
+		{
+			$base_url = preg_replace('/[^\/]*$/im', '', $base_url);
+
+			$url = $base_url . $url;
+		}
+
+		$url = htmlspecialchars_decode($url);
+
+		return $url;
+	}
+
+	private function url_callback($matches)
+	{
+		if ( !empty($matches[2]) )
+		{
+			$match = $matches[3];
+		}
+		elseif ( !empty($matches[4]) )
+		{
+			$match = $matches[5];
+		}
+		else
+		{
+			$match = $matches[6];
+		}
+
+		if ( !preg_match('/^data\:((application)|(image))\//im', $match) )
+		{
+			$match = $this->update_url($match, $this->base_url);
+		}
+
+		if ( !empty($matches[2]) )
+		{
+			$match = '"' . $match . '"';
+		}
+		elseif ( !empty($matches[4]) )
+		{
+			$match = '\'' . $match . '\'';
+		}
+
+		return 'url(' . $match . ')';
+	}
+
+	private function external_css_callback($matches)
+	{
+		$match = $matches[1];
+
+		if ( !preg_match('/ rel=(("stylesheet")|(\'stylesheet\'))/i', $match) )
+		{
+			return '<link' . $match . ' />';
+		}
+
+
+		$match = preg_replace('/ href=(((")\/\/([^"]*)("))|((\')\/\/([^\']*)(\')))/i', ' href=${3}${7}https://${4}${8}${5}${9}', $match);
+
+		if ( !preg_match('/ href=(("([^"]*)")|(\'([^\']*)\'))/i', $match, $match2) )
+		{
+			return '<link' . $match . ' />';
+		}
+		$url = !empty($match2[2]) ? $match2[3] : $match2[5];
+
+		$host = preg_replace('/^https?:\/\/([^\/]+)\/.*$/im', '${1}', $url);
+		if ( in_array($host, $this->font_server_list) )
+		{
+			return '<link' . $match . ' />';
+		}
+
+
+		require_once $this->plugin_dir_path . 'pwamp/lib/get-remote-file-content.php';
+
+		$css = get_remote_data($url);
+
+		$this->base_url = $url;
+		$css = preg_replace_callback('/url\((("([^"]*)")|(\'([^\']*)\')|([^"\'\)]*))\)/i', array($this, 'url_callback'), $css);
+
+		if ( preg_match('/ media=(("([^"]*)")|(\'([^\']*)\'))/i', $match, $match2) )
+		{
+			$media = !empty($match2[2]) ? $match2[3] : $match2[5];
+			if ( !preg_match('/^all$/im', $media ) )
+			{
+				$css = '@media ' . $media . '{' . $css . '}';
+			}
+		}
+
+
+		if ( preg_match('/ id=(("([^"]*)")|(\'([^\']*)\'))/i', $match, $match2) )
+		{
+			$id = !empty($match2[2]) ? $match2[3] : $match2[5];
+
+			return '<style id="' . $id . '" type="text/css">' . $css . '</style>';
+		}
+		else
+		{
+			return '<style type="text/css">' . $css . '</style>';
+		}
+	}
+
+	public function start_buffer()
+	{
+		ob_start();
+	}
+
+	public function end_buffer()
+	{
+		$buffer = ob_get_clean();
+
+		$buffer = preg_replace_callback('/<link\b([^>]*)\s*?\/?>/iU', array($this, 'external_css_callback'), $buffer);
+
+		echo $buffer;
+	}
+
+
 	private function catch_page_callback($page)
 	{
 		if ( empty($page) )
@@ -466,6 +646,12 @@ toolbox.router.default = toolbox.cacheFirst;';
 			$this->plugin_dir_url = preg_replace('/\/$/im', '', $this->plugin_dir_url) . '-extension/';
 		}
 
+
+		add_action('wp_head', array($this, 'start_buffer'), 0);
+		add_action('wp_head', array($this, 'end_buffer'), PHP_INT_MAX);
+
+		add_action('wp_footer', array($this, 'start_buffer'), 0);
+		add_action('wp_footer', array($this, 'end_buffer'), PHP_INT_MAX);
 
 		add_action('after_setup_theme', array($this, 'after_setup_theme'));
 		add_action('shutdown', array($this, 'shutdown'));

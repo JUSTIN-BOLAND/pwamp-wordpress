@@ -4,22 +4,10 @@ if ( !defined('ABSPATH') )
 	exit;
 }
 
-require_once plugin_dir_path(__FILE__) . 'lib/get-remote-file-content.php';
-require_once plugin_dir_path(__FILE__) . 'lib/get-remote-image-size.php';
-
 class PWAMPTranscoding
 {
 	private $img_style = 'amp-img.pwamp-contain>img{object-fit:contain}';
 	private $sidebar_style = 'amp-sidebar>nav{width:auto;margin:0;padding:0;font-family:Lato,Arial,sans-serif;font-size:16px;line-height:1.6}amp-sidebar,amp-sidebar .submenu{width:100%;height:100%}amp-sidebar .main-menu,amp-sidebar .submenu{overflow:auto}amp-sidebar .submenu{top:0;left:0;position:absolute}amp-sidebar .hide-submenu{visibility:hidden;transform:translateX(-100%)}amp-sidebar .show-submenu{visibility:visible;transform:translateX(0)}amp-sidebar .hide-parent{visibility:hidden}amp-sidebar .truncate{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}amp-sidebar .link-container{display:block;height:44px;line-height:44px;border-bottom:1px solid #f0f0f0;padding:0 1rem}amp-sidebar a{min-width:44px;min-height:44px;text-decoration:none;cursor:pointer}amp-sidebar .submenu-icon{padding-right:44px}amp-sidebar .submenu-icon::after{position:absolute;right:0;height:44px;width:44px;content:\'\';background-size:1rem;background-image:url(\'data:image/svg+xml;utf8, <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M5 3l3.057-3 11.943 12-11.943 12-3.057-3 9-9z"/></svg>\');background-repeat:no-repeat;background-position:center}amp-sidebar .controls{display:flex;height:50px;background:#f0f0f0}amp-sidebar .controls a{display:flex;justify-content:center;align-items:center}amp-sidebar .controls span{line-height:50px;margin:0 auto}amp-sidebar nav>.controls>a:first-of-type{visibility:hidden}amp-sidebar .controls a svg{height:1rem;width:1rem}amp-sidebar .link-icon{float:left;height:44px;margin-right:.75rem}amp-sidebar .link-icon>svg{height:44px}amp-sidebar{background:#fff;color:#232323;fill:#232323;text-transform:uppercase;letter-spacing:.18rem;font-size:.875rem}amp-sidebar a{color:#232323;text-transform:none;letter-spacing:normal}div[class*="-sidebar-mask"]{opacity:.8}amp-sidebar a:hover{text-decoration:underline;fill:#232323}amp-sidebar .view-all{font-style:italic;font-weight:700}';
-
-	private $font_server_list = array(
-		'cloud.typography.com',
-		'fast.fonts.net',
-		'fonts.googleapis.com',
-		'use.typekit.net',
-		'maxcdn.bootstrapcdn.com',
-		'use.fontawesome.com'
-	);
 
 	private $home_url = '';
 
@@ -27,15 +15,15 @@ class PWAMPTranscoding
 	private $canonical = '';
 	private $permalink = '';
 	private $page_type = '';
-	private $viewport_width = 0;
+	private $viewport_width = 414;
 	private $plugin_dir_url = '';
 
 	private $home_url_pattern = '';
 	private $host_url = '';
 
+	private $selector_list = array();
 	private $style_list = array();
 	private $image_list = array();
-	private $selector_list = array();
 
 	private $style = '';
 	private $extened_style = false;
@@ -144,6 +132,30 @@ class PWAMPTranscoding
 	}
 
 
+	private function minicss($css, $id = '')
+	{
+		$css = !empty($id) ? $id . '{' . $css . '}' : $css;
+
+		$css = preg_replace('/\/\*[^*]*\*+([^\/][^*]*\*+)*\//', '', $css);
+		$css = preg_replace('/[\r\n\s\t]+/', ' ', $css);
+		$css = preg_replace('/\s*([{}\[\(:;,>\+~])\s*/i', '${1}', $css);
+		$css = str_replace(';}', '}', $css);
+		$css = trim($css);
+
+		$css = preg_replace('/\s*!important\b\s*/i', '', $css);
+		$css = preg_replace('/\s*@charset (("utf-8")|(\'utf-8\'));\s*/i', '', $css);
+		$css = preg_replace('/\s*@((-ms-viewport)|(viewport)){[^}]+}\s*/i', '', $css);
+		$css = preg_replace('/\s*text-rendering:\s*optimizeLegibility;??\s*/iU', '', $css);
+		$css = preg_replace('/\s*\*display:\s*/i', 'display:', $css);
+
+		if ( !empty($id) && preg_match('/{}$/im', $css) )
+		{
+			return;
+		}
+
+		return $css;
+	}
+
 	private function update_url($url, $base_url = '')
 	{
 		if ( empty($base_url) )
@@ -210,30 +222,6 @@ class PWAMPTranscoding
 		return $url;
 	}
 
-	private function minicss($css, $id = '')
-	{
-		$css = !empty($id) ? $id . '{' . $css . '}' : $css;
-
-		$css = preg_replace('/\/\*[^*]*\*+([^\/][^*]*\*+)*\//', '', $css);
-		$css = preg_replace('/[\r\n\s\t]+/', ' ', $css);
-		$css = preg_replace('/\s*([{}\[\(:;,>\+~])\s*/i', '${1}', $css);
-		$css = str_replace(';}', '}', $css);
-		$css = trim($css);
-
-		$css = preg_replace('/\s*!important\b\s*/i', '', $css);
-		$css = preg_replace('/\s*@charset (("utf-8")|(\'utf-8\'));\s*/i', '', $css);
-		$css = preg_replace('/\s*@((-ms-viewport)|(viewport)){[^}]+}\s*/i', '', $css);
-		$css = preg_replace('/\s*text-rendering:\s*optimizeLegibility;??\s*/iU', '', $css);
-		$css = preg_replace('/\s*\*display:\s*/i', 'display:', $css);
-
-		if ( !empty($id) && preg_match('/{}$/im', $css) )
-		{
-			return;
-		}
-
-		return $css;
-	}
-
 	private function get_extened_style()
 	{
 		if ( empty($this->style_list) )
@@ -295,56 +283,6 @@ class PWAMPTranscoding
 		}
 	}
 
-
-	private function external_css_callback($matches)
-	{
-		$match = $matches[1];
-
-		if ( !preg_match('/ rel=(("stylesheet")|(\'stylesheet\'))/i', $match) )
-		{
-			return '<link' . $match . ' />';
-		}
-
-
-		if ( !preg_match('/ href=(("([^"]*)")|(\'([^\']*)\'))/i', $match, $match2) )
-		{
-			return '<link' . $match . ' />';
-		}
-		$url = !empty($match2[2]) ? $match2[3] : $match2[5];
-		$url = preg_replace('/^\/\//im', 'https://', $url);
-
-		$host = preg_replace('/^https?:\/\/([^\/]+)\/.*$/im', '${1}', $url);
-		if ( in_array($host, $this->font_server_list) )
-		{
-			$match = preg_replace('/ href=(((")\/\/([^"]*)("))|((\')\/\/([^\']*)(\')))/i', ' href=${3}${7}https://${4}${8}${5}${9}', $match);
-
-			return '<link' . $match . ' />';
-		}
-
-		if ( $this->extened_style )
-		{
-			return '';
-		}
-
-
-		$css = get_remote_data($url);
-
-		$this->base_url = $url;
-		$css = preg_replace_callback('/url\((("([^"]*)")|(\'([^\']*)\')|([^"\'\)]*))\)/i', array($this, 'url_callback'), $css);
-
-		if ( preg_match('/ media=(("([^"]*)")|(\'([^\']*)\'))/i', $match, $match2) )
-		{
-			$media = !empty($match2[2]) ? $match2[3] : $match2[5];
-			if ( !preg_match('/^all$/im', $media ) )
-			{
-				$css = '@media ' . $media . '{' . $css . '}';
-			}
-		}
-
-		$this->style .= $css;
-
-		return '';
-	}
 
 	private function form_callback($matches)
 	{
@@ -454,15 +392,6 @@ class PWAMPTranscoding
 			if ( array_key_exists($img, $this->image_list) )
 			{
 				$match .= $this->image_list[$img];
-			}
-		}
-
-		if ( !preg_match('/ width=(("([^"]*)")|(\'([^\']*)\'))/i', $match) && !preg_match('/ height=(("([^"]*)")|(\'([^\']*)\'))/i', $match) )
-		{
-			list($width, $height) = get_image_size($src);
-			if ( !empty($width) && !empty($height) )
-			{
-				$match .= ' width="' . $width . '" height="' . $height . '"';
 			}
 		}
 
@@ -598,6 +527,22 @@ class PWAMPTranscoding
 
 
 		/*
+			<style></style>
+		*/
+		// The mandatory attribute 'amp-custom' is missing in tag 'style amp-custom'.
+		$page = preg_replace_callback('/<style\b[^>]*>(.*)<\/style>/isU', array($this, 'internal_css_callback'), $page);
+
+		$page = preg_replace('/<noscript>[\s\t\r\n]*<\/noscript>/i', '', $page);
+
+
+		/*
+			<script></script>
+		*/
+		// Custom JavaScript is not allowed.
+		$page = preg_replace('/<script\b[^>]*>.*<\/script>/isU', '', $page);
+
+
+		/*
 			<audio></audio>
 		*/
 		// The tag 'audio' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-audio'?
@@ -649,9 +594,6 @@ class PWAMPTranscoding
 		/*
 			<link/>
 		*/
-		// The attribute 'href' in tag 'link rel=stylesheet for fonts' is set to the invalid value...
-		$page = preg_replace_callback('/<link\b([^>]*)\s*?\/?>/iU', array($this, 'external_css_callback'), $page);
-
 		$page = preg_replace('/<link\b[^>]* rel=(("apple-touch-icon")|(\'apple-touch-icon\'))[^>]* href=(("[^"]*")|(\'[^\']*\'))[^>]*\s*?\/?>/iU', '', $page);
 
 		// The tag 'link rel=canonical' appears more than once in the document.
@@ -682,22 +624,6 @@ class PWAMPTranscoding
 		$page = preg_replace('/<meta\b[^>]* name=(("viewport")|(\'viewport\'))[^>]*\s*?\/?>/iU', '', $page);
 
 		$page = preg_replace('/^[\s\t]*<meta\b([^>]*)\s*?>/imU', '<meta${1}>', $page);
-
-
-		/*
-			<script></script>
-		*/
-		// Custom JavaScript is not allowed.
-		$page = preg_replace('/<script\b[^>]*>.*<\/script>/isU', '', $page);
-
-
-		/*
-			<style></style>
-		*/
-		// The mandatory attribute 'amp-custom' is missing in tag 'style amp-custom'.
-		$page = preg_replace_callback('/<style\b[^>]*>(.*)<\/style>/isU', array($this, 'internal_css_callback'), $page);
-
-		$page = preg_replace('/<noscript>[\s\t\r\n]*<\/noscript>/i', '', $page);
 
 
 		/*

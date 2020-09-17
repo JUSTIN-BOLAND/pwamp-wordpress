@@ -5,7 +5,7 @@ Tags: wordpress, amp, plugin, google, theme, pwa, accelerated mobile pages, prog
 Requires at least: 4.7
 Tested up to: 5.5.1
 Requires PHP: 5.2.4
-Stable tag: 5.0
+Stable tag: 5.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -56,7 +56,11 @@ You can Google to find the solution, for example, this one: https://www.howtogee
 
 == Changelog ==
 
-= 5.5.0 =
+= 5.1 =
+(Thur., Sep. 17, 2020)
+* improvement
+
+= 5.0 =
 (Mon., Sep. 14, 2020)
 * re-architecture
 
