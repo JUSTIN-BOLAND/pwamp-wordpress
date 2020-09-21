@@ -5,7 +5,7 @@ Tags: wordpress, amp, plugin, google, theme, pwa, accelerated mobile pages, prog
 Requires at least: 4.7
 Tested up to: 5.5.1
 Requires PHP: 5.2.4
-Stable tag: 5.1
+Stable tag: 5.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -21,10 +21,12 @@ AMP can only work based on HTTPS -- you need to update your server to support SS
 None.
 
 == Demo ==
-1. https://pwamp-wordpress.flexplat.com
+1. https://shop.flexplat.com
+2. https://creative-portfolio.flexplat.com
 
 == Screenshots ==
-1. https://download.flexplat.com/pwamp-wordpress.png
+1. https://download.flexplat.com/shop.png
+2. https://download.flexplat.com/creative-portfolio.png
 
 == Download ==
 1. GitHub: https://github.com/rickey29/pwamp-wordpress
@@ -55,6 +57,11 @@ I use Chrome Lighthouse Extension: https://chrome.google.com/webstore/detail/lig
 You can Google to find the solution, for example, this one: https://www.howtogeek.com/196087/how-to-add-websites-to-the-home-screen-on-any-smartphone-or-tablet/ .
 
 == Changelog ==
+
+= 5.2 =
+(Mon., Sep. 21, 2020)
+* support Neve theme Shop starter site
+* support Neve theme Creative Portfolio starter site
 
 = 5.1 =
 (Thur., Sep. 17, 2020)

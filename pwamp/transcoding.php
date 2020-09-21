@@ -224,6 +224,8 @@ class PWAMPTranscoding
 
 	private function get_extened_style()
 	{
+		$this->extened_style = false;
+
 		if ( empty($this->style_list) )
 		{
 			return;
@@ -519,7 +521,6 @@ class PWAMPTranscoding
 
 	public function transcode_html($page)
 	{
-		$this->extened_style = false;
 		$this->style = $this->get_extened_style();
 
 
@@ -540,6 +541,18 @@ class PWAMPTranscoding
 		*/
 		// Custom JavaScript is not allowed.
 		$page = preg_replace('/<script\b[^>]*>.*<\/script>/isU', '', $page);
+
+
+		/*
+			<amp-install-serviceworker></amp-install-serviceworker>
+		*/
+		$page = preg_replace('/<amp-install-serviceworker.+>.*<\/amp-install-serviceworker>/isU', '', $page);
+
+
+		/*
+			<amp-pixel></amp-pixel>
+		*/
+		$page = preg_replace('/<amp-pixel.+>.*<\/amp-pixel>/isU', '', $page);
 
 
 		/*
@@ -627,6 +640,12 @@ class PWAMPTranscoding
 
 
 		/*
+			<style amp-custom></style>
+		*/
+		$page = preg_replace('/<style amp-custom>.*<\/style>/isU', '', $page);
+
+
+		/*
 			<title></title>
 		*/
 		$page = preg_replace('/^[\s\t]*<title>(.*)<\/title>/im', '<title>${1}</title>', $page, 1);
@@ -707,11 +726,9 @@ class PWAMPTranscoding
 	public function transcode_head($page)
 	{
 		// Service Workers
-		$page = preg_replace('/<amp-install-serviceworker.+>.*<\/amp-install-serviceworker>/isU', '', $page);
 		$this->body = '<amp-install-serviceworker src="' . $this->home_url . '/' . ( empty($this->permalink) ? '?' : '' ) . 'pwamp-sw.js" data-iframe-src="' . $this->home_url . '/' . ( empty($this->permalink) ? '?' : '' ) . 'pwamp-sw.html" layout="nodisplay"></amp-install-serviceworker>';
 
 		// Viewport Width
-		$page = preg_replace('/<amp-pixel.+>.*<\/amp-pixel>/isU', '', $page);
 		$this->body .= "\n" . '<amp-pixel src="' . $this->home_url . '/?pwamp-viewport-width=VIEWPORT_WIDTH" layout="nodisplay"></amp-pixel>';
 
 		$page = preg_replace('/<body\b([^>]*)\s*?>/iU', '<body${1}>' . "\n" . $this->body, $page, 1);
@@ -828,9 +845,7 @@ class PWAMPTranscoding
 			$this->head .= "\n" . '<script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>';
 		}
 
-		// amp-custom style
-		$page = preg_replace('/<style amp-custom>.*<\/style>/isU', '', $page);
-
+		// Custom Style
 		if ( !empty($this->style) )
 		{
 			$this->style = str_replace('\\', '\\\\', $this->style);

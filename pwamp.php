@@ -3,7 +3,7 @@
 Plugin Name: PWA+AMP
 Plugin URI:  https://flexplat.com
 Description: Converts WordPress into Progressive Web Apps and Accelerated Mobile Pages styles.
-Version:     5.1
+Version:     5.2
 Author:      Rickey Gu
 Author URI:  https://flexplat.com
 Text Domain: pwamp
