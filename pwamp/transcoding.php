@@ -21,9 +21,10 @@ class PWAMPTranscoding
 	private $home_url_pattern = '';
 	private $host_url = '';
 
-	private $selector_list = array();
 	private $style_list = array();
 	private $image_list = array();
+	private $selector_list = array();
+	private $selector_remove_list = array();
 
 	private $style = '';
 	private $extened_style = false;
@@ -116,11 +117,6 @@ class PWAMPTranscoding
 		return $this->home_url_pattern;
 	}
 
-	public function set_selector_list($selector_list)
-	{
-		$this->selector_list = $selector_list;
-	}
-
 	public function set_style_list($style_list)
 	{
 		$this->style_list = $style_list;
@@ -129,6 +125,16 @@ class PWAMPTranscoding
 	public function set_image_list($image_list)
 	{
 		$this->image_list = $image_list;
+	}
+
+	public function set_selector_list($selector_list)
+	{
+		$this->selector_list = $selector_list;
+	}
+
+	public function set_selector_remove_list($selector_list)
+	{
+		$this->selector_remove_list = $selector_list;
 	}
 
 
@@ -258,6 +264,11 @@ class PWAMPTranscoding
 
 	private function collect_selector($page)
 	{
+		if ( $this->extened_style )
+		{
+			return;
+		}
+
 		preg_match_all('/<[a-z][^>]*\s+class=(("([^"]*)")|(\'([^\']*)\'))[^>]*>/i', $page, $matches);
 		foreach ( $matches[1] as $key => $value )
 		{
@@ -404,7 +415,7 @@ class PWAMPTranscoding
 
 		if ( !preg_match('/ height=(("([^"]*)")|(\'([^\']*)\'))/i', $match) )
 		{
-			$match .= ' height="300"';
+			$match .= ' height="600"';
 		}
 
 
@@ -747,12 +758,8 @@ class PWAMPTranscoding
 		$this->style = preg_replace('/@keyframes\b[^{]*({((?:[^{}]+|(?1))*)})/i', '', $this->style);
 		$this->style = preg_replace('/@supports\b[^{]*({((?:[^{}]+|(?1))*)})/i', '', $this->style);
 
-		if ( !$this->extened_style )
-		{
-			$this->collect_selector($page);
-
-			$this->style = preg_replace_callback('/([^{]+)({((?:[^{}]+|(?2))*)})/i', array($this, 'css_callback'), $this->style);
-		}
+		$this->collect_selector($page);
+		$this->style = preg_replace_callback('/([^{]+)({((?:[^{}]+|(?2))*)})/i', array($this, 'css_callback'), $this->style);
 
 		if ( preg_match('/<amp-img\b[^>]*>/i', $page) )
 		{
@@ -890,7 +897,15 @@ class PWAMPTranscoding
 		$match = $matches[1];
 		$match2 = $matches[3];
 
-		if ( preg_match('/^@/im', $match) )
+		if ( !empty($this->selector_remove_list[$match]) )
+		{
+			return '';
+		}
+		elseif ( $this->extened_style )
+		{
+			return $match . '{' . $match2 . '}';
+		}
+		elseif ( preg_match('/^@/im', $match) )
 		{
 			return $match . '{' . $match2 . '}';
 		}

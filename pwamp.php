@@ -3,7 +3,7 @@
 Plugin Name: PWA+AMP
 Plugin URI:  https://flexplat.com
 Description: Converts WordPress into Progressive Web Apps and Accelerated Mobile Pages styles.
-Version:     5.2
+Version:     5.3.0
 Author:      Rickey Gu
 Author URI:  https://flexplat.com
 Text Domain: pwamp
@@ -36,7 +36,7 @@ class PWAMP
 
 	private $page_url = '';
 	private $permalink = '';
-	private $viewport_width = '';
+	private $viewport_width = '414';
 	private $plugin_dir_url = '';
 
 	private $canonical = '';
@@ -71,7 +71,10 @@ class PWAMP
 		$page_url = ( isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http' ) . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 		$this->page_url = preg_replace('/(\?|&)__amp_source_origin=.+$/im', '', $page_url);
 		$this->permalink = get_option('permalink_structure');
-		$this->viewport_width = !empty($_COOKIE['pwamp_viewport_width']) ? $_COOKIE['pwamp_viewport_width'] : '';
+		if ( !empty($_COOKIE['pwamp_viewport_width']) )
+		{
+			$this->viewport_width = $_COOKIE['pwamp_viewport_width'];
+		}
 		$this->plugin_dir_url = plugin_dir_url(__FILE__);
 
 		$canonical = htmlspecialchars_decode($this->page_url);
@@ -577,7 +580,7 @@ toolbox.router.default = toolbox.cacheFirst;';
 		{
 			return;
 		}
-		elseif ( $GLOBALS['pagenow'] === 'wp-signup.php' || $GLOBALS['pagenow'] === 'wp-activate.php' || $GLOBALS['pagenow'] === 'admin-ajax.php' )
+		elseif ( $GLOBALS['pagenow'] === 'admin-ajax.php' || $GLOBALS['pagenow'] === 'wp-activate.php' || $GLOBALS['pagenow'] === 'wp-cron.php' || $GLOBALS['pagenow'] === 'wp-signup.php' )
 		{
 			return;
 		}
