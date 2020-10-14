@@ -3,7 +3,7 @@
 Plugin Name: PWA+AMP
 Plugin URI:  https://flexplat.com
 Description: Converts WordPress into Progressive Web Apps and Accelerated Mobile Pages styles.
-Version:     5.3.0
+Version:     5.4.0
 Author:      Rickey Gu
 Author URI:  https://flexplat.com
 Text Domain: pwamp
@@ -79,9 +79,9 @@ class PWAMP
 
 		$canonical = htmlspecialchars_decode($this->page_url);
 		$canonical = preg_replace('/^(.*)(((\?)|(&(amp;)?))((amp)|(desktop))(=1)?)?(#[^#]*)?$/imU', '${1}${11}', $canonical);
-		$amphtml = preg_replace('/^(.*)(#[^#]*)?$/imU', '${1}' . ( ( strpos($canonical, '?') !== false ) ? '&amp=1' : '?amp=1' ) . '${2}', $canonical);
+		$amphtml = preg_replace('/^(.*)(#[^#]*)?$/imU', '${1}' . ( ( strpos($canonical, '?') !== false ) ? '&' : '?' ) . 'amp=1${2}', $canonical);
 		$this->amphtml = htmlspecialchars($amphtml);
-		$canonical = preg_replace('/^(.*)(#[^#]*)?$/imU', '${1}' . ( ( strpos($canonical, '?') !== false ) ? '&desktop=1' : '?desktop=1' ) . '${2}', $canonical);
+		$canonical = preg_replace('/^(.*)(#[^#]*)?$/imU', '${1}' . ( ( strpos($canonical, '?') !== false ) ? '&' : '?' ) . 'desktop=1${2}', $canonical);
 		$this->canonical = htmlspecialchars($canonical);
 
 		$home_url_pattern = preg_replace('/^https?:\/\//im', 'https?://', $this->home_url);
@@ -609,26 +609,45 @@ toolbox.router.default = toolbox.cacheFirst;';
 		$this->divert();
 
 
-		if ( !empty($_GET['amp']) || !empty($_GET['desktop']) )
+		if ( isset($_GET['amp']) && empty($_GET['amp']) )
 		{
-			$device = empty($_GET['desktop']) ? 'mobile' : 'desktop';
+			$device = 'mobile';
+		}
+		elseif ( isset($_GET['desktop']) && empty($_GET['desktop']) )
+		{
+			$device = 'desktop';
+		}
+		elseif ( !empty($_GET['amp']) )
+		{
+			$device = 'mobile';
+
+			setcookie('pwamp_style', $device, $this->time_now + 60*60*24*365, COOKIEPATH, COOKIE_DOMAIN);
+		}
+		elseif ( !empty($_GET['desktop']) )
+		{
+			$device = 'desktop';
+
+			setcookie('pwamp_style', $device, $this->time_now + 60*60*24*365, COOKIEPATH, COOKIE_DOMAIN);
 		}
 		elseif ( is_plugin_active('pwamp-canonical/pwamp.php') )
 		{
 			$device = 'mobile';
+
+			setcookie('pwamp_style', $device, $this->time_now + 60*60*24*365, COOKIEPATH, COOKIE_DOMAIN);
 		}
 		elseif ( !empty($_COOKIE['pwamp_style']) )
 		{
 			$device = $_COOKIE['pwamp_style'] != 'desktop' ? 'mobile' : 'desktop';
+
+			setcookie('pwamp_style', $device, $this->time_now + 60*60*24*365, COOKIEPATH, COOKIE_DOMAIN);
 		}
 		else
 		{
 			$device = $this->get_device();
-
 			$device = ( $device != 'desktop' && $device != 'desktop-bot' ) ? 'mobile' : 'desktop';
-		}
 
-		setcookie('pwamp_style', $device, $this->time_now + 60*60*24*365, COOKIEPATH, COOKIE_DOMAIN);
+			setcookie('pwamp_style', $device, $this->time_now + 60*60*24*365, COOKIEPATH, COOKIE_DOMAIN);
+		}
 
 
 		if ( $device == 'desktop' )
@@ -638,6 +657,11 @@ toolbox.router.default = toolbox.cacheFirst;';
 			return;
 		}
 
+
+		if ( !function_exists('is_amp_endpoint') )
+		{
+			require_once $this->plugin_dir_path . 'pwamp/lib/amp.php';
+		}
 
 		if ( is_plugin_active('pwamp-canonical/pwamp.php') )
 		{
@@ -670,9 +694,3 @@ toolbox.router.default = toolbox.cacheFirst;';
 $pwamp = new PWAMP();
 
 add_action('plugins_loaded', array($pwamp, 'plugins_loaded'));
-
-
-function is_amp_endpoint()
-{
-	return true;
-}
