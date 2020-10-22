@@ -318,6 +318,15 @@ class PWAMPTranscoding
 				// The attribute 'action' may not appear in tag 'FORM [method=POST]'.
 				$match = preg_replace('/ action=(("[^"]*")|(\'[^\']*\'))/i', ' action-xhr=${1}', $match);
 			}
+
+			if ( !preg_match('/ target=(("[^"]*")|(\'[^\']*\'))/i', $match) )
+			{
+			}
+			elseif ( !preg_match('/ target=(("_blank")|(\'_blank\'))/i', $match) && !preg_match('/ target=(("_top")|(\'_top\'))/i', $match) )
+			{
+				// The attribute 'target' in tag 'form' is set to the invalid value 'popupwindow'.
+				$match = preg_replace('/ target=(("[^"]*")|(\'[^\']*\'))/i', ' target="_top"', $match);
+			}
 		}
 		else
 		{
@@ -332,10 +341,15 @@ class PWAMPTranscoding
 				$match = preg_replace('/ action=(("[^"]*")|(\'[^\']*\'))/i', ' action="' . $this->page_url . '"', $match);
 			}
 
-			// The mandatory attribute 'target' is missing in tag 'FORM [method=GET]'.
 			if ( !preg_match('/ target=(("[^"]*")|(\'[^\']*\'))/i', $match) )
 			{
+				// The mandatory attribute 'target' is missing in tag 'FORM [method=GET]'.
 				$match .= ' target="_top"';
+			}
+			elseif ( !preg_match('/ target=(("_blank")|(\'_blank\'))/i', $match) && !preg_match('/ target=(("_top")|(\'_top\'))/i', $match) )
+			{
+				// The attribute 'target' in tag 'form' is set to the invalid value 'popupwindow'.
+				$match = preg_replace('/ target=(("[^"]*")|(\'[^\']*\'))/i', ' target="_top"', $match);
 			}
 		}
 
@@ -597,7 +611,7 @@ class PWAMPTranscoding
 			<iframe></iframe>
 		*/
 		// The tag 'iframe' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-iframe'?
-		$page = preg_replace_callback('/<iframe\b([^>]*)\s*?\/?><\/iframe>/iU', array($this, 'iframe_callback'), $page);
+		$page = preg_replace_callback('/<iframe\b([^>]*)\s*?\/?>\s*<\/iframe>/iU', array($this, 'iframe_callback'), $page);
 
 
 		/*

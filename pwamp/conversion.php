@@ -15,7 +15,7 @@ class PWAMPConversion
 	}
 
 
-	public function convert($page, $home_url, $data, $theme, $active_plugins)
+	public function convert($page, $home_url, $data, $theme, $plugins, $style, $templates)
 	{
 		require_once plugin_dir_path(__FILE__) . 'transcoding.php';
 
