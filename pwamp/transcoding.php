@@ -65,7 +65,7 @@ class PWAMPTranscoding
 		{
 			$canonical = htmlspecialchars_decode($this->page_url);
 			$canonical = preg_replace('/^(.*)(((\?)|(&(amp;)?))((amp)|(desktop))(=1)?)?(#[^#]*)?$/imU', '${1}${11}', $canonical);
-			$canonical = preg_replace('/^(.*)(#[^#]*)?$/imU', '${1}' . ( ( strpos($canonical, '?') !== false ) ? '&' : '?' ) . 'desktop=1${2}', $canonical);
+			$canonical = preg_replace('/^(.*)(#[^#]*)?$/imU', '${1}' . ( ( strpos($canonical, '?') !== false ) ? '&' : '?' ) . 'desktop${2}', $canonical);
 			$this->canonical = htmlspecialchars($canonical);
 		}
 
@@ -934,8 +934,10 @@ class PWAMPTranscoding
 
 			$element = preg_replace('/ img\b/i', ' amp-img', $element);
 			$element = preg_replace('/ amp-img amp-img$/im', ' amp-img img', $element);
-			$element2 = preg_replace('/\s*::?[a-z][a-z-]*(\([^\)]*\))?\s*/i', ';', $element);
-			$element2 = preg_replace('/\s*\[[^\]]*\]\s*/i', ';', $element2);
+
+			$element2 = preg_replace('/::?[a-z][a-z-]*/i', '', $element);
+			$element2 = preg_replace('/\([^\)]*\)/i', '', $element2);
+			$element2 = preg_replace('/\[[^\]]*\]/i', '', $element2);
 
 			preg_match_all('/[\.#]?-?[_a-z]+[_a-z0-9-]*/i', $element2, $keys);
 			foreach ( $keys[0] as $key )

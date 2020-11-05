@@ -3,7 +3,7 @@
 Plugin Name: PWA+AMP
 Plugin URI:  https://flexplat.com
 Description: Converts WordPress into Progressive Web Apps and Accelerated Mobile Pages styles.
-Version:     5.5.0
+Version:     5.6.0
 Author:      Rickey Gu
 Author URI:  https://flexplat.com
 Text Domain: pwamp
@@ -79,9 +79,9 @@ class PWAMP
 
 		$canonical = htmlspecialchars_decode($this->page_url);
 		$canonical = preg_replace('/^(.*)(((\?)|(&(amp;)?))((amp)|(desktop))(=1)?)?(#[^#]*)?$/imU', '${1}${11}', $canonical);
-		$amphtml = preg_replace('/^(.*)(#[^#]*)?$/imU', '${1}' . ( ( strpos($canonical, '?') !== false ) ? '&' : '?' ) . 'amp=1${2}', $canonical);
+		$amphtml = preg_replace('/^(.*)(#[^#]*)?$/imU', '${1}' . ( ( strpos($canonical, '?') !== false ) ? '&' : '?' ) . 'amp${2}', $canonical);
 		$this->amphtml = htmlspecialchars($amphtml);
-		$canonical = preg_replace('/^(.*)(#[^#]*)?$/imU', '${1}' . ( ( strpos($canonical, '?') !== false ) ? '&' : '?' ) . 'desktop=1${2}', $canonical);
+		$canonical = preg_replace('/^(.*)(#[^#]*)?$/imU', '${1}' . ( ( strpos($canonical, '?') !== false ) ? '&' : '?' ) . 'desktop${2}', $canonical);
 		$this->canonical = htmlspecialchars($canonical);
 
 		$home_url_pattern = preg_replace('/^https?:\/\//im', 'https?://', $this->home_url);

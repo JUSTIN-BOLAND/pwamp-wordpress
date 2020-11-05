@@ -3,9 +3,9 @@ Contributors: rickey29
 Donate link: https://flexplat.com
 Tags: wordpress, amp, plugin, google, theme, pwa, accelerated mobile pages, progressive web apps, pwamp, wp, amphtml, mobile, performance, speed, seo, adaptive images
 Requires at least: 4.7
-Tested up to: 5.5.1
+Tested up to: 5.5.3
 Requires PHP: 5.2.4
-Stable tag: 5.5.0
+Stable tag: 5.6.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -25,12 +25,24 @@ None.
 2. https://creative-portfolio.flexplat.com/?amp=1
 3. https://blogger.flexplat.com/?amp=1
 4. https://web-agency.flexplat.com/?amp=1
+5. https://apparel.flexplat.com/?amp=1
+6. https://book-shop.flexplat.com/?amp=1
+7. https://pet-shop.flexplat.com/?amp=1
+8. https://boat-rental.flexplat.com/?amp=1
+9. https://jewellery-shop-2.flexplat.com/?amp=1
+10. https://perfume-shop.flexplat.com/?amp=1
 
 == Screenshots ==
 1. https://download.flexplat.com/shop.png
 2. https://download.flexplat.com/creative-portfolio.png
 3. https://download.flexplat.com/blogger.png
 4. https://download.flexplat.com/web-agency.png
+5. https://download.flexplat.com/apparel.png
+6. https://download.flexplat.com/book-shop.png
+7. https://download.flexplat.com/pet-shop.png
+8. https://download.flexplat.com/boat-rental.png
+9. https://download.flexplat.com/jewellery-shop-2.png
+10. https://download.flexplat.com/perfume-shop.png
 
 == Download ==
 1. GitHub: https://github.com/rickey29/pwamp-wordpress
@@ -61,6 +73,14 @@ I use Chrome Lighthouse Extension: https://chrome.google.com/webstore/detail/lig
 You can Google to find the solution, for example, this one: https://www.howtogeek.com/196087/how-to-add-websites-to-the-home-screen-on-any-smartphone-or-tablet/ .
 
 == Changelog ==
+
+= 5.6.0 =
+(Sun., Nov. 01, 2020)
+* support Neve theme Book Shop starter site
+* support Neve theme Pet Shop starter site
+* support Neve theme Boat Rental starter site
+* support Neve theme Jewellery Shop 2 starter site
+* support Neve theme Perfume Shop starter site
 
 = 5.5.0 =
 (Thur., Oct. 22, 2020)
