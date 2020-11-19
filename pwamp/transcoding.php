@@ -15,7 +15,6 @@ class PWAMPTranscoding
 	private $canonical = '';
 	private $permalink = '';
 	private $page_type = '';
-	private $viewport_width = 414;
 	private $plugin_dir_url = '';
 
 	private $home_url_pattern = '';
@@ -50,12 +49,13 @@ class PWAMPTranscoding
 
 		if ( !empty($data['page_url']) && is_string($data['page_url']) )
 		{
-			$this->page_url = $data['page_url'];
+			$page_url = $data['page_url'];
 		}
 		else
 		{
-			$this->page_url = $home_url . '/';
+			$page_url = $home_url . '/';
 		}
+		$this->page_url = preg_replace('/^(.*)(((\?)|(&(amp;)?))((mobile)|(desktop))(=1)?)?(#[^#]*)?$/imU', '${1}${11}', $page_url);
 
 		if ( !empty($data['canonical']) && is_string($data['canonical']) )
 		{
@@ -63,9 +63,8 @@ class PWAMPTranscoding
 		}
 		else
 		{
-			$canonical = htmlspecialchars_decode($this->page_url);
-			$canonical = preg_replace('/^(.*)(((\?)|(&(amp;)?))((amp)|(desktop))(=1)?)?(#[^#]*)?$/imU', '${1}${11}', $canonical);
-			$canonical = preg_replace('/^(.*)(#[^#]*)?$/imU', '${1}' . ( ( strpos($canonical, '?') !== false ) ? '&' : '?' ) . 'desktop${2}', $canonical);
+			$page_url = htmlspecialchars_decode($this->page_url);
+			$canonical = preg_replace('/^(.*)(#[^#]*)?$/imU', '${1}' . ( ( strpos($page_url, '?') !== false ) ? '&' : '?' ) . 'desktop${2}', $page_url);
 			$this->canonical = htmlspecialchars($canonical);
 		}
 
@@ -77,11 +76,6 @@ class PWAMPTranscoding
 		if ( !empty($data['page_type']) && is_string($data['page_type']) )
 		{
 			$this->page_type = $data['page_type'];
-		}
-
-		if ( !empty($data['viewport_width']) && is_string($data['viewport_width']) )
-		{
-			$this->viewport_width = (int)$data['viewport_width'];
 		}
 
 		if ( !empty($data['plugin_dir_url']) && is_string($data['plugin_dir_url']) )
@@ -105,11 +99,6 @@ class PWAMPTranscoding
 	public function get_home_url()
 	{
 		return $this->home_url;
-	}
-
-	public function get_viewport_width()
-	{
-		return $this->viewport_width;
 	}
 
 	public function get_home_url_pattern()
@@ -569,18 +558,6 @@ class PWAMPTranscoding
 
 
 		/*
-			<amp-install-serviceworker></amp-install-serviceworker>
-		*/
-		$page = preg_replace('/<amp-install-serviceworker.+>.*<\/amp-install-serviceworker>/isU', '', $page);
-
-
-		/*
-			<amp-pixel></amp-pixel>
-		*/
-		$page = preg_replace('/<amp-pixel.+>.*<\/amp-pixel>/isU', '', $page);
-
-
-		/*
 			<audio></audio>
 		*/
 		// The tag 'audio' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-audio'?
@@ -603,7 +580,6 @@ class PWAMPTranscoding
 		/*
 			<html>
 		*/
-		$page = preg_replace('/<html\b([^>]*) ((amp)|(⚡))\b([^>]*)\s*?>/iU', '<html${1}${5}>', $page, 1);
 		$page = preg_replace('/<html\b([^>]*)\s*?>/iU', '<html amp${1}>', $page, 1);
 
 
@@ -623,8 +599,6 @@ class PWAMPTranscoding
 		/*
 			<img/>
 		*/
-		$page = preg_replace('/<amp-img\b[^>]+><noscript><img\b([^>]+)\s?\/><\/noscript><\/amp-img>/iU', '<img${1} />', $page);
-
 		// The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'?
 		$page = preg_replace_callback('/<img\b([^>]*)\s*?\/?>(<noscript><img\b[^>]*\s*?\/?><\/noscript>)??/iU', array($this, 'img_callback'), $page);
 
@@ -632,12 +606,8 @@ class PWAMPTranscoding
 		/*
 			<link/>
 		*/
-		$page = preg_replace('/<link\b[^>]* rel=(("apple-touch-icon")|(\'apple-touch-icon\'))[^>]* href=(("[^"]*")|(\'[^\']*\'))[^>]*\s*?\/?>/iU', '', $page);
-
 		// The tag 'link rel=canonical' appears more than once in the document.
 		$page = preg_replace('/<link\b[^>]* rel=(("canonical")|(\'canonical\'))[^>]*\s*?\/?>/iU', '', $page);
-
-		$page = preg_replace('/<link\b[^>]* rel=(("manifest")|(\'manifest\'))[^>]* href=(("[^"]*")|(\'[^\']*\'))[^>]*\s*?\/?>/iU', '', $page);
 
 		$page = preg_replace('/^[\s\t]*<link\b([^>]*)\s*?>/imU', '<link${1}>', $page);
 
@@ -648,26 +618,10 @@ class PWAMPTranscoding
 		// The tag 'meta charset=utf-8' appears more than once in the document.
 		$page = preg_replace('/<meta\b[^>]* charset=(("utf-8")|(\'utf-8\'))[^>]*\s*?\/?>/iU', '', $page);
 
-		// The attribute 'content' in tag 'meta http-equiv=Content-Type' is set to the invalid value 'text/html;charset=utf-8'.
-		$page = preg_replace('/<meta http-equiv="Content-Type" content="text\/html;\s?charset=[^"]*"\s*?\/?>/iU', '', $page);
-
-		// The attribute 'http-equiv' may not appear in tag 'meta name= and content='.
-		$page = preg_replace('/<meta\b[^>]* http-equiv=(("refresh")|(\'refresh\'))[^>]*\s*?\/?>/iU', '', $page);
-
-		$page = preg_replace('/<meta name="pwamp-page-type" content="[^"]+"\s*?\/?>/iU', '', $page);
-
-		$page = preg_replace('/<meta\b[^>]* name=(("theme-color")|(\'theme-color\'))[^>]* content=(("[^"]*")|(\'[^\']*\'))[^>]*\s*?\/?>/iU', '', $page);
-
 		// The tag 'meta name=viewport' appears more than once in the document.
 		$page = preg_replace('/<meta\b[^>]* name=(("viewport")|(\'viewport\'))[^>]*\s*?\/?>/iU', '', $page);
 
 		$page = preg_replace('/^[\s\t]*<meta\b([^>]*)\s*?>/imU', '<meta${1}>', $page);
-
-
-		/*
-			<style amp-custom></style>
-		*/
-		$page = preg_replace('/<style amp-custom>.*<\/style>/isU', '', $page);
 
 
 		/*
@@ -727,20 +681,6 @@ class PWAMPTranscoding
 		return '';
 	}
 
-	private function link2_callback($matches)
-	{
-		$this->head .= '<link' . $matches[1] . ' rel=' . $matches[2] . $matches[5] . ' />'. "\n";
-
-		return '';
-	}
-
-	private function meta_callback($matches)
-	{
-		$this->head .= "\n" . '<meta' . $matches[1] . ' />';
-
-		return '';
-	}
-
 	private function title_callback($matches)
 	{
 		$this->head .= "\n" . '<title>' . $matches[1] . '</title>';
@@ -752,9 +692,6 @@ class PWAMPTranscoding
 	{
 		// Service Workers
 		$this->body = '<amp-install-serviceworker src="' . $this->home_url . '/' . ( empty($this->permalink) ? '?' : '' ) . 'pwamp-sw.js" data-iframe-src="' . $this->home_url . '/' . ( empty($this->permalink) ? '?' : '' ) . 'pwamp-sw.html" layout="nodisplay"></amp-install-serviceworker>';
-
-		// Viewport Width
-		$this->body .= "\n" . '<amp-pixel src="' . $this->home_url . '/?pwamp-viewport-width=VIEWPORT_WIDTH" layout="nodisplay"></amp-pixel>';
 
 		$page = preg_replace('/<body\b([^>]*)\s*?>/iU', '<body${1}>' . "\n" . $this->body, $page, 1);
 
@@ -791,9 +728,6 @@ class PWAMPTranscoding
 
 		// The mandatory tag 'meta name=viewport' is missing or incorrect.
 		$this->head .= "\n" . '<meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1" />';
-
-		// The tag 'meta http-equiv=Content-Type' may only appear as a descendant of tag 'head'.
-		$page = preg_replace_callback('/<meta\b([^>]*)\s*?\/?>/iU', array($this, 'meta_callback'), $page);
 
 		// pwamp-page-type
 		if ( !empty($this->page_type) )
@@ -878,9 +812,6 @@ class PWAMPTranscoding
 
 		$this->head = '';
 
-		// The parent tag of tag 'link rel=stylesheet for fonts' is 'body', but it can only be 'head'.
-		$page = preg_replace_callback('/<link\b([^>]*) rel=(("stylesheet")|(\'stylesheet\'))([^>]*)\s*?\/?>/iU', array($this, 'link2_callback'), $page);
-
 		// The mandatory tag 'link rel=canonical' is missing or incorrect.
 		$this->head .= '<link rel="canonical" href="' . $this->canonical . '" />';
 
@@ -917,6 +848,17 @@ class PWAMPTranscoding
 		}
 		elseif ( $this->extened_style )
 		{
+			return $match . '{' . $match2 . '}';
+		}
+		elseif ( preg_match('/^@media\b /im', $match) )
+		{
+			$match2 = preg_replace_callback('/([^{]+)({((?:[^{}]+|(?2))*)})/i', array($this, 'css_callback'), $match2);
+
+			if ( empty($match2) )
+			{
+				return '';
+			}
+
 			return $match . '{' . $match2 . '}';
 		}
 		elseif ( preg_match('/^@/im', $match) )
@@ -1001,71 +943,6 @@ class PWAMPTranscoding
 		elseif ( preg_match('/\bspeech\b/i', $match) && !preg_match('/\bscreen\b/i', $match) )
 		{
 			return '';
-		}
-
-
-		if ( preg_match('/min-width:\s?(\d+(\.\d+)?)px/i', $match, $match3) )
-		{
-			$min_width = (int)$match3[1];
-		}
-		elseif ( preg_match('/min-width:\s?(\d+(\.\d+)?)em/i', $match, $match3) )
-		{
-			$min_width = (int)$match3[1] * 16;
-		}
-
-		if ( preg_match('/max-width:\s?(\d+(\.\d+)?)px/i', $match, $match3) )
-		{
-			$max_width = (int)$match3[1];
-		}
-		elseif ( preg_match('/max-width:\s?(\d+(\.\d+)?)em/i', $match, $match3) )
-		{
-			$max_width = (int)$match3[1] * 16;
-		}
-
-		if ( isset($min_width) && isset($max_width) )
-		{
-			if ( $this->viewport_width == 0 )
-			{
-				return '@media ' . $match . '{' . $match2 . '}';
-			}
-			elseif ( $this->viewport_width >= $min_width && $this->viewport_width <= $max_width )
-			{
-				return $match2;
-			}
-			else
-			{
-				return '';
-			}
-		}
-		elseif ( isset($min_width) )
-		{
-			if ( $this->viewport_width == 0 )
-			{
-				return '@media ' . $match . '{' . $match2 . '}';
-			}
-			elseif ( $this->viewport_width >= $min_width )
-			{
-				return $match2;
-			}
-			else
-			{
-				return '';
-			}
-		}
-		elseif ( isset($max_width) )
-		{
-			if ( $this->viewport_width == 0 )
-			{
-				return '@media ' . $match . '{' . $match2 . '}';
-			}
-			elseif ( $this->viewport_width <= $max_width )
-			{
-				return $match2;
-			}
-			else
-			{
-				return '';
-			}
 		}
 		else
 		{

@@ -5,7 +5,7 @@ Tags: wordpress, amp, plugin, google, theme, pwa, accelerated mobile pages, prog
 Requires at least: 4.7
 Tested up to: 5.5.3
 Requires PHP: 5.2.4
-Stable tag: 5.6.0
+Stable tag: 5.7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -21,16 +21,16 @@ AMP can only work based on HTTPS -- you need to update your server to support SS
 None.
 
 == Demo ==
-1. https://shop.flexplat.com/?amp=1
-2. https://creative-portfolio.flexplat.com/?amp=1
-3. https://blogger.flexplat.com/?amp=1
-4. https://web-agency.flexplat.com/?amp=1
-5. https://apparel.flexplat.com/?amp=1
-6. https://book-shop.flexplat.com/?amp=1
-7. https://pet-shop.flexplat.com/?amp=1
-8. https://boat-rental.flexplat.com/?amp=1
-9. https://jewellery-shop-2.flexplat.com/?amp=1
-10. https://perfume-shop.flexplat.com/?amp=1
+1. https://shop.flexplat.com/?mobile=1
+2. https://creative-portfolio.flexplat.com/?mobile=1
+3. https://blogger.flexplat.com/?mobile=1
+4. https://web-agency.flexplat.com/?mobile=1
+5. https://apparel.flexplat.com/?mobile=1
+6. https://book-shop.flexplat.com/?mobile=1
+7. https://pet-shop.flexplat.com/?mobile=1
+8. https://boat-rental.flexplat.com/?mobile=1
+9. https://jewellery-shop-2.flexplat.com/?mobile=1
+10. https://perfume-shop.flexplat.com/?mobile=1
 
 == Screenshots ==
 1. https://download.flexplat.com/shop.png
@@ -73,6 +73,10 @@ I use Chrome Lighthouse Extension: https://chrome.google.com/webstore/detail/lig
 You can Google to find the solution, for example, this one: https://www.howtogeek.com/196087/how-to-add-websites-to-the-home-screen-on-any-smartphone-or-tablet/ .
 
 == Changelog ==
+
+= 5.7.0 =
+(Thur., Nov. 19, 2020)
+* support Neve theme Restaurant starter site
 
 = 5.6.0 =
 (Sun., Nov. 01, 2020)
