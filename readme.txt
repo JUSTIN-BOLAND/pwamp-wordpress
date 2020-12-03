@@ -5,7 +5,7 @@ Tags: wordpress, amp, plugin, google, theme, pwa, accelerated mobile pages, prog
 Requires at least: 4.7
 Tested up to: 5.5.3
 Requires PHP: 5.2.4
-Stable tag: 5.7.0
+Stable tag: 5.8.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -21,28 +21,30 @@ AMP can only work based on HTTPS -- you need to update your server to support SS
 None.
 
 == Demo ==
-1. https://shop.flexplat.com/?mobile=1
-2. https://creative-portfolio.flexplat.com/?mobile=1
-3. https://blogger.flexplat.com/?mobile=1
-4. https://web-agency.flexplat.com/?mobile=1
-5. https://apparel.flexplat.com/?mobile=1
-6. https://book-shop.flexplat.com/?mobile=1
-7. https://pet-shop.flexplat.com/?mobile=1
-8. https://boat-rental.flexplat.com/?mobile=1
-9. https://jewellery-shop-2.flexplat.com/?mobile=1
-10. https://perfume-shop.flexplat.com/?mobile=1
+1. https://apparel.flexplat.com/?amp
+2. https://blogger.flexplat.com/?amp
+3. https://boat-rental.flexplat.com/?amp
+4. https://book-shop.flexplat.com/?amp
+5. https://creative-portfolio.flexplat.com/?amp
+6. https://jewellery-shop-2.flexplat.com/?amp
+7. https://perfume-shop.flexplat.com/?amp
+8. https://pet-shop.flexplat.com/?amp
+9. https://restaurant.flexplat.com/?amp
+10. https://shop.flexplat.com/?amp
+11. https://web-agency.flexplat.com/?amp
 
 == Screenshots ==
-1. https://download.flexplat.com/shop.png
-2. https://download.flexplat.com/creative-portfolio.png
-3. https://download.flexplat.com/blogger.png
-4. https://download.flexplat.com/web-agency.png
-5. https://download.flexplat.com/apparel.png
-6. https://download.flexplat.com/book-shop.png
-7. https://download.flexplat.com/pet-shop.png
-8. https://download.flexplat.com/boat-rental.png
-9. https://download.flexplat.com/jewellery-shop-2.png
-10. https://download.flexplat.com/perfume-shop.png
+1. https://download.flexplat.com/apparel.png
+2. https://download.flexplat.com/blogger.png
+3. https://download.flexplat.com/boat-rental.png
+4. https://download.flexplat.com/book-shop.png
+5. https://download.flexplat.com/creative-portfolio.png
+6. https://download.flexplat.com/jewellery-shop-2.png
+7. https://download.flexplat.com/perfume-shop.png
+8. https://download.flexplat.com/pet-shop.png
+9. https://download.flexplat.com/restaurant.png
+10. https://download.flexplat.com/shop.png
+11. https://download.flexplat.com/web-agency.png
 
 == Download ==
 1. GitHub: https://github.com/rickey29/pwamp-wordpress
@@ -73,6 +75,10 @@ I use Chrome Lighthouse Extension: https://chrome.google.com/webstore/detail/lig
 You can Google to find the solution, for example, this one: https://www.howtogeek.com/196087/how-to-add-websites-to-the-home-screen-on-any-smartphone-or-tablet/ .
 
 == Changelog ==
+
+= 5.8.0 =
+(Thur., Dec. 03, 2020)
+* several bug fix and improvement
 
 = 5.7.0 =
 (Thur., Nov. 19, 2020)

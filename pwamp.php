@@ -3,7 +3,7 @@
 Plugin Name: PWA+AMP
 Plugin URI:  https://flexplat.com
 Description: Converts WordPress into Progressive Web Apps and Accelerated Mobile Pages styles.
-Version:     5.7.0
+Version:     5.8.0
 Author:      Rickey Gu
 Author URI:  https://flexplat.com
 Text Domain: pwamp
@@ -65,17 +65,13 @@ class PWAMP
 		$this->theme = get_option('template');
 		$this->plugins = get_option('active_plugins');
 
-		$page_url = ( isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http' ) . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-		$page_url = preg_replace('/(\?|&)__amp_source_origin=.+$/im', '', $page_url);
-		$this->page_url = preg_replace('/^(.*)(((\?)|(&(amp;)?))((mobile)|(desktop))(=1)?)?(#[^#]*)?$/imU', '${1}${11}', $page_url);
+		$parts = parse_url($this->home_url);
+		$this->page_url = $parts['scheme'] . '://' . $parts['host'] . remove_query_arg(array('amp', '__amp_source_origin'));
 		$this->permalink = get_option('permalink_structure');
 		$this->plugin_dir_url = plugin_dir_url(__FILE__);
 
-		$page_url = htmlspecialchars_decode($this->page_url);
-		$amphtml = preg_replace('/^(.*)(#[^#]*)?$/imU', '${1}' . ( ( strpos($page_url, '?') !== false ) ? '&' : '?' ) . 'mobile${2}', $page_url);
-		$this->amphtml = htmlspecialchars($amphtml);
-		$canonical = preg_replace('/^(.*)(#[^#]*)?$/imU', '${1}' . ( ( strpos($page_url, '?') !== false ) ? '&' : '?' ) . 'desktop${2}', $page_url);
-		$this->canonical = htmlspecialchars($canonical);
+		$this->amphtml = add_query_arg(array('amp' => ''), $this->page_url);
+		$this->canonical = $this->page_url;
 
 		$home_url_pattern = preg_replace('/^https?:\/\//im', 'https?://', $this->home_url);
 		$this->home_url_pattern = str_replace(array('/', '.'), array('\/', '\.'), $home_url_pattern);
@@ -92,7 +88,7 @@ class PWAMP
 		if ( preg_match('/^' . $this->home_url_pattern . '\/\??manifest\.webmanifest$/im', $this->page_url) )
 		{
 			header('Content-Type: application/x-web-app-manifest+json', true);
-			echo '{"name":"' . get_bloginfo('name') . ' &#8211; ' . get_bloginfo('description') . '","short_name":"' . get_bloginfo('name') . '","start_url":"' . $this->home_url . '","icons":[{"src":".' . $this->plugin_dir . ( is_plugin_active('pwamp-extension/pwamp.php') && file_exists($this->plugin_dir_path . '../pwamp-extension/pwamp/manifest/mf-logo-192.png') ? '-extension' :'' ) . '/pwamp/manifest/mf-logo-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},{"src":".' . $this->plugin_dir . ( is_plugin_active('pwamp-extension/pwamp.php') && file_exists($this->plugin_dir_path . '../pwamp-extension/pwamp/manifest/mf-logo-512.png') ? '-extension' :'' ) . '/pwamp/manifest/mf-logo-512.png","sizes":"512x512","type":"image/png"}],"theme_color":"#ffffff","background_color":"#ffffff","display":"standalone"}';
+			echo '{"name":"' . get_bloginfo('name') . ' &#8211; ' . get_bloginfo('description') . '","short_name":"' . get_bloginfo('name') . '","start_url":"' . $this->home_url . '/?amp","icons":[{"src":".' . $this->plugin_dir . ( is_plugin_active('pwamp-extension/pwamp.php') && file_exists($this->plugin_dir_path . '../pwamp-extension/pwamp/manifest/mf-logo-192.png') ? '-extension' :'' ) . '/pwamp/manifest/mf-logo-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},{"src":".' . $this->plugin_dir . ( is_plugin_active('pwamp-extension/pwamp.php') && file_exists($this->plugin_dir_path . '../pwamp-extension/pwamp/manifest/mf-logo-512.png') ? '-extension' :'' ) . '/pwamp/manifest/mf-logo-512.png","sizes":"512x512","type":"image/png"}],"theme_color":"#ffffff","background_color":"#ffffff","display":"standalone"}';
 
 			exit();
 		}
@@ -134,24 +130,14 @@ toolbox.router.default = toolbox.cacheFirst;';
 	}
 
 
-	private function get_device()
-	{
-		require_once $this->plugin_dir_path . 'pwamp/detection.php';
-
-		$detection = new PWAMPDetection();
-
-		$user_agent = !empty($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
-		$accept = !empty($_SERVER['HTTP_ACCEPT']) ? $_SERVER['HTTP_ACCEPT'] : '';
-		$profile = !empty($_SERVER['HTTP_PROFILE']) ? $_SERVER['HTTP_PROFILE'] : '';
-
-		$device = $detection->get_device($user_agent, $accept, $profile);
-
-		return $device;
-	}
-
 	public function add_amphtml()
 	{
-		echo '<link rel="amphtml" href="' . $this->amphtml . '" />' . "\n";
+		echo '<link rel="amphtml" href="' . $this->amphtml . '" />
+<script type="text/javascript">
+	if ( screen.width <= 768 || screen.height <= 576 ) {
+		window.location = "' . $this->amphtml . '";
+	}
+</script>' . "\n";
 	}
 
 	private function get_external_canonical()
@@ -603,44 +589,17 @@ toolbox.router.default = toolbox.cacheFirst;';
 		$this->divert();
 
 
-		if ( isset($_GET['mobile']) && empty($_GET['mobile']) )
+		if ( isset($_GET['amp']) )
 		{
 			$device = 'mobile';
-		}
-		elseif ( isset($_GET['desktop']) && empty($_GET['desktop']) )
-		{
-			$device = 'desktop';
-		}
-		elseif ( !empty($_GET['mobile']) )
-		{
-			$device = 'mobile';
-
-			setcookie('pwamp_style', $device, $this->time_now + 60*60*24*365, COOKIEPATH, COOKIE_DOMAIN);
-		}
-		elseif ( !empty($_GET['desktop']) )
-		{
-			$device = 'desktop';
-
-			setcookie('pwamp_style', $device, $this->time_now + 60*60*24*365, COOKIEPATH, COOKIE_DOMAIN);
 		}
 		elseif ( is_plugin_active('pwamp-canonical/pwamp.php') )
 		{
 			$device = 'mobile';
-
-			setcookie('pwamp_style', $device, $this->time_now + 60*60*24*365, COOKIEPATH, COOKIE_DOMAIN);
-		}
-		elseif ( !empty($_COOKIE['pwamp_style']) )
-		{
-			$device = $_COOKIE['pwamp_style'] != 'desktop' ? 'mobile' : 'desktop';
-
-			setcookie('pwamp_style', $device, $this->time_now + 60*60*24*365, COOKIEPATH, COOKIE_DOMAIN);
 		}
 		else
 		{
-			$device = $this->get_device();
-			$device = ( $device != 'desktop' && $device != 'desktop-bot' ) ? 'mobile' : 'desktop';
-
-			setcookie('pwamp_style', $device, $this->time_now + 60*60*24*365, COOKIEPATH, COOKIE_DOMAIN);
+			$device = 'desktop';
 		}
 
 

@@ -49,13 +49,12 @@ class PWAMPTranscoding
 
 		if ( !empty($data['page_url']) && is_string($data['page_url']) )
 		{
-			$page_url = $data['page_url'];
+			$this->page_url = $data['page_url'];
 		}
 		else
 		{
-			$page_url = $home_url . '/';
+			$this->page_url = $home_url . '/';
 		}
-		$this->page_url = preg_replace('/^(.*)(((\?)|(&(amp;)?))((mobile)|(desktop))(=1)?)?(#[^#]*)?$/imU', '${1}${11}', $page_url);
 
 		if ( !empty($data['canonical']) && is_string($data['canonical']) )
 		{
@@ -63,9 +62,7 @@ class PWAMPTranscoding
 		}
 		else
 		{
-			$page_url = htmlspecialchars_decode($this->page_url);
-			$canonical = preg_replace('/^(.*)(#[^#]*)?$/imU', '${1}' . ( ( strpos($page_url, '?') !== false ) ? '&' : '?' ) . 'desktop${2}', $page_url);
-			$this->canonical = htmlspecialchars($canonical);
+			$this->canonical = $this->page_url;
 		}
 
 		if ( !empty($data['permalink']) && is_string($data['permalink']) )
@@ -286,6 +283,20 @@ class PWAMPTranscoding
 	}
 
 
+	private function a_callback($matches)
+	{
+		$match = !empty($matches[3]) ? $matches[4] : $matches[6];
+
+		if ( preg_match('/^' . $this->home_url_pattern . '\//im', $match) )
+		{
+			$match = str_replace('&#038;', '&amp;', $match);
+			$match = preg_replace('/^(.*)(((\?)|(&(amp;)?))amp)?(#.*)?$/imU', '${1}${7}', $match);
+			$match = preg_replace('/^(.*)(#.*)?$/imU', '${1}' . ( ( strpos($match, '?') !== false ) ? '&amp;' : '?' ) . 'amp${2}', $match);
+		}
+
+		return '<a' . $matches[1] . ' href="' . $match . '"' . $matches[7] . '>';
+	}
+
 	private function form_callback($matches)
 	{
 		$match = $matches[1];
@@ -345,6 +356,20 @@ class PWAMPTranscoding
 		return '<form' . $match . '>';
 	}
 
+	private function form2_callback($matches)
+	{
+		$match = !empty($matches[5]) ? $matches[6] : $matches[8];
+
+		if ( preg_match('/^' . $this->home_url_pattern . '\//im', $match) )
+		{
+			$match = str_replace('&#038;', '&amp;', $match);
+			$match = preg_replace('/^(.*)(((\?)|(&(amp;)?))amp)?(#.*)?$/imU', '${1}${7}', $match);
+			$match = preg_replace('/^(.*)(#.*)?$/imU', '${1}' . ( ( strpos($match, '?') !== false ) ? '&amp;' : '?' ) . 'amp${2}', $match);
+		}
+
+		return '<form' . $matches[1] . $matches[2] . '="' . $match . '"' . $matches[9] . '>';
+	}
+
 	private function iframe_callback($matches)
 	{
 		$match = $matches[1];
@@ -390,8 +415,8 @@ class PWAMPTranscoding
 
 		if ( !empty($this->image_list) )
 		{
-			$src2 = preg_replace('/^' . $this->home_url_pattern . '\//im', '', $src);
-			$img = 'src="' . $src2 . '"';
+			$src = preg_replace('/.*' . $this->home_url_pattern . '\//im', '', $src);
+			$img = 'src="' . $src . '"';
 
 			if ( preg_match('/ width=(("([^"]*)")|(\'([^\']*)\'))/i', $match, $match2) )
 			{
@@ -558,6 +583,12 @@ class PWAMPTranscoding
 
 
 		/*
+			<a></a>
+		*/
+		$page = preg_replace_callback('/<a\b([^>]*) href=(("([^"]*)")|(\'([^\']*)\'))([^>]*)\s*?>/iU', array($this, 'a_callback'), $page);
+
+
+		/*
 			<audio></audio>
 		*/
 		// The tag 'audio' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-audio'?
@@ -568,6 +599,7 @@ class PWAMPTranscoding
 			<form></form>
 		*/
 		$page = preg_replace_callback('/<form\b([^>]*)\s*?>/iU', array($this, 'form_callback'), $page);
+		$page = preg_replace_callback('/<form\b([^>]*)( action(-xhr)?)=(("([^"]*)")|(\'([^\']*)\'))([^>]*)\s*?>/iU', array($this, 'form2_callback'), $page);
 
 
 		/*
