@@ -3,9 +3,9 @@ Contributors: rickey29
 Donate link: https://flexplat.com
 Tags: wordpress, amp, plugin, google, theme, pwa, accelerated mobile pages, progressive web apps, pwamp, wp, amphtml, mobile, performance, speed, seo, adaptive images
 Requires at least: 4.7
-Tested up to: 5.5.3
+Tested up to: 5.6
 Requires PHP: 5.2.4
-Stable tag: 5.8.0
+Stable tag: 5.9.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -21,30 +21,26 @@ AMP can only work based on HTTPS -- you need to update your server to support SS
 None.
 
 == Demo ==
-1. https://apparel.flexplat.com/?amp
-2. https://blogger.flexplat.com/?amp
-3. https://boat-rental.flexplat.com/?amp
-4. https://book-shop.flexplat.com/?amp
-5. https://creative-portfolio.flexplat.com/?amp
-6. https://jewellery-shop-2.flexplat.com/?amp
-7. https://perfume-shop.flexplat.com/?amp
-8. https://pet-shop.flexplat.com/?amp
-9. https://restaurant.flexplat.com/?amp
-10. https://shop.flexplat.com/?amp
-11. https://web-agency.flexplat.com/?amp
+1. https://apparel.flexplat.com/?pwamp
+2. https://boat-rental.flexplat.com/?pwamp
+3. https://book-shop.flexplat.com/?pwamp
+4. https://digital-store.flexplat.com/?pwamp
+5. https://electronics-shop.flexplat.com/?pwamp
+6. https://jewellery-shop-2.flexplat.com/?pwamp
+7. https://perfume-shop.flexplat.com/?pwamp
+8. https://pet-shop.flexplat.com/?pwamp
+9. https://shop.flexplat.com/?pwamp
 
 == Screenshots ==
 1. https://download.flexplat.com/apparel.png
-2. https://download.flexplat.com/blogger.png
-3. https://download.flexplat.com/boat-rental.png
-4. https://download.flexplat.com/book-shop.png
-5. https://download.flexplat.com/creative-portfolio.png
+2. https://download.flexplat.com/boat-rental.png
+3. https://download.flexplat.com/book-shop.png
+4. https://download.flexplat.com/digital-store.png
+5. https://download.flexplat.com/electronics-shop.png
 6. https://download.flexplat.com/jewellery-shop-2.png
 7. https://download.flexplat.com/perfume-shop.png
 8. https://download.flexplat.com/pet-shop.png
-9. https://download.flexplat.com/restaurant.png
-10. https://download.flexplat.com/shop.png
-11. https://download.flexplat.com/web-agency.png
+9. https://download.flexplat.com/shop.png
 
 == Download ==
 1. GitHub: https://github.com/rickey29/pwamp-wordpress
@@ -75,6 +71,16 @@ I use Chrome Lighthouse Extension: https://chrome.google.com/webstore/detail/lig
 You can Google to find the solution, for example, this one: https://www.howtogeek.com/196087/how-to-add-websites-to-the-home-screen-on-any-smartphone-or-tablet/ .
 
 == Changelog ==
+
+= 5.9.0 =
+(Tue., Jan. 05, 2021)
+* support Neve theme Digital Store starter site
+* support Neve theme Electrocics Shop starter site
+* support Neve theme Music Band starter site
+* support Neve theme Music Band 2 starter site
+* support Neve theme Original starter site
+* support Neve theme Tattoo starter site
+* support Neve theme Travel Agency starter site
 
 = 5.8.0 =
 (Thur., Dec. 03, 2020)

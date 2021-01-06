@@ -93,16 +93,6 @@ class PWAMPTranscoding
 	}
 
 
-	public function get_home_url()
-	{
-		return $this->home_url;
-	}
-
-	public function get_home_url_pattern()
-	{
-		return $this->home_url_pattern;
-	}
-
 	public function set_style_list($style_list)
 	{
 		$this->style_list = $style_list;
@@ -123,13 +113,23 @@ class PWAMPTranscoding
 		$this->selector_remove_list = $selector_list;
 	}
 
+	public function get_home_url()
+	{
+		return $this->home_url;
+	}
+
+	public function get_home_url_pattern()
+	{
+		return $this->home_url_pattern;
+	}
+
 
 	private function minicss($css, $id = '')
 	{
 		$css = !empty($id) ? $id . '{' . $css . '}' : $css;
 
 		$css = preg_replace('/\/\*[^*]*\*+([^\/][^*]*\*+)*\//', '', $css);
-		$css = preg_replace('/[\r\n\s\t]+/', ' ', $css);
+		$css = preg_replace('/[\s\t\r\n]+/', ' ', $css);
 		$css = preg_replace('/\s*([{}\[\(:;,>\+~])\s*/i', '${1}', $css);
 		$css = str_replace(';}', '}', $css);
 		$css = trim($css);
@@ -283,20 +283,6 @@ class PWAMPTranscoding
 	}
 
 
-	private function a_callback($matches)
-	{
-		$match = !empty($matches[3]) ? $matches[4] : $matches[6];
-
-		if ( preg_match('/^' . $this->home_url_pattern . '\//im', $match) )
-		{
-			$match = str_replace('&#038;', '&amp;', $match);
-			$match = preg_replace('/^(.*)(((\?)|(&(amp;)?))amp)?(#.*)?$/imU', '${1}${7}', $match);
-			$match = preg_replace('/^(.*)(#.*)?$/imU', '${1}' . ( ( strpos($match, '?') !== false ) ? '&amp;' : '?' ) . 'amp${2}', $match);
-		}
-
-		return '<a' . $matches[1] . ' href="' . $match . '"' . $matches[7] . '>';
-	}
-
 	private function form_callback($matches)
 	{
 		$match = $matches[1];
@@ -363,31 +349,48 @@ class PWAMPTranscoding
 		if ( preg_match('/^' . $this->home_url_pattern . '\//im', $match) )
 		{
 			$match = str_replace('&#038;', '&amp;', $match);
-			$match = preg_replace('/^(.*)(((\?)|(&(amp;)?))amp)?(#.*)?$/imU', '${1}${7}', $match);
-			$match = preg_replace('/^(.*)(#.*)?$/imU', '${1}' . ( ( strpos($match, '?') !== false ) ? '&amp;' : '?' ) . 'amp${2}', $match);
+			$match = preg_replace('/^(.*)(((\?)|(&(amp;)?))pwamp)?(#.*)?$/imU', '${1}${7}', $match);
+			$match = preg_replace('/^(.*)(#.*)?$/imU', '${1}' . ( ( strpos($match, '?') !== false ) ? '&amp;' : '?' ) . 'pwamp${2}', $match);
 		}
 
 		return '<form' . $matches[1] . $matches[2] . '="' . $match . '"' . $matches[9] . '>';
+	}
+
+	private function href_callback($matches)
+	{
+		$match = !empty($matches[3]) ? $matches[4] : $matches[6];
+
+		if ( preg_match('/^' . $this->home_url_pattern . '\//im', $match) )
+		{
+			$match = str_replace('&#038;', '&amp;', $match);
+			$match = preg_replace('/^(.*)(((\?)|(&(amp;)?))pwamp)?(#.*)?$/imU', '${1}${7}', $match);
+			$match = preg_replace('/^(.*)(#.*)?$/imU', '${1}' . ( ( strpos($match, '?') !== false ) ? '&amp;' : '?' ) . 'pwamp${2}', $match);
+		}
+
+		return '<a' . $matches[1] . ' href="' . $match . '"' . $matches[7] . '>';
 	}
 
 	private function iframe_callback($matches)
 	{
 		$match = $matches[1];
 
-		if ( !preg_match('/ src=(("([^"]*)")|(\'([^\']*)\'))/i', $match, $match2) )
+		if ( !preg_match('/ src=(("[^"]*")|(\'[^\']*\'))/i', $match) )
 		{
 			return '';
 		}
 
-		if ( !preg_match('/ height=(("([^"]*)")|(\'([^\']*)\'))/i', $match) )
+		$match = preg_replace('/ sizes=(("[^"]*")|(\'[^\']*\'))/i', '', $match);
+
+		// The attribute 'frameborder' in tag 'amp-iframe' is set to the invalid value 'no'.
+		$match = preg_replace('/ frameborder=(((")no("))|((\')no(\')))/i', ' frameborder=${3}${6}0${4}${7}', $match);
+
+		if ( !preg_match('/ height=(("[^"]*")|(\'[^\']*\'))/i', $match) )
 		{
 			$match .= ' height="400"';
 		}
 
-		$match = preg_replace('/ sizes=(("[^"]*")|(\'[^\']*\'))/i', '', $match);
-
 		$match = preg_replace('/ layout=(("[^"]*")|(\'[^\']*\'))/i', '', $match);
-		if ( !preg_match('/ width=(("([^"]*)")|(\'([^\']*)\'))/i', $match) )
+		if ( !preg_match('/ width=(("[^"]*")|(\'[^\']*\'))/i', $match) )
 		{
 			$match .= ' width="auto"';
 			$match .= ' layout="fixed-height"';
@@ -415,7 +418,7 @@ class PWAMPTranscoding
 
 		if ( !empty($this->image_list) )
 		{
-			$src = preg_replace('/.*' . $this->home_url_pattern . '\//im', '', $src);
+			$src = preg_replace('/.*' . $this->home_url_pattern . '\//i', '', $src);
 			$img = 'src="' . $src . '"';
 
 			if ( preg_match('/ width=(("([^"]*)")|(\'([^\']*)\'))/i', $match, $match2) )
@@ -486,7 +489,7 @@ class PWAMPTranscoding
 
 	private function internal_css_callback($matches)
 	{
-		$match = $matches[1];
+		$match = $matches[2];
 
 		if ( !$this->extened_style )
 		{
@@ -499,6 +502,16 @@ class PWAMPTranscoding
 	private function pixel_callback($matches)
 	{
 		$this->body .= "\n" . '<amp-pixel src="' . $matches[1] . '" layout="nodisplay"></amp-pixel>';
+
+		return '';
+	}
+
+	private function script_callback($matches)
+	{
+		if ( !empty($matches[1]) && !empty($matches[2]) )
+		{
+			return $matches[0];
+		}
 
 		return '';
 	}
@@ -555,7 +568,22 @@ class PWAMPTranscoding
 
 	private function video_callback($matches)
 	{
-		return '<amp-video' . $match . '><noscript><video' . $matches[1] . ' /></noscript></amp-video>';
+		$match = $matches[1];
+
+		if ( !preg_match('/ width=(("([^"]*)")|(\'([^\']*)\'))/i', $match) )
+		{
+			$match .= ' width="400"';
+		}
+
+		if ( !preg_match('/ height=(("([^"]*)")|(\'([^\']*)\'))/i', $match) )
+		{
+			$match .= ' height="225"';
+		}
+
+		// The attribute 'playsinline' may not appear in tag 'amp-video'.
+		$match = preg_replace('/ playsinline=(("[^"]*")|(\'[^\']*\'))/i', '', $match);
+
+		return '<amp-video' . $match . '>' . $matches[2] . '</amp-video>';
 	}
 
 	public function transcode_html($page)
@@ -567,25 +595,23 @@ class PWAMPTranscoding
 
 
 		/*
-			<style></style>
-		*/
-		// The mandatory attribute 'amp-custom' is missing in tag 'style amp-custom'.
-		$page = preg_replace_callback('/<style\b[^>]*>(.*)<\/style>/isU', array($this, 'internal_css_callback'), $page);
-
-		$page = preg_replace('/<noscript>[\s\t\r\n]*<\/noscript>/i', '', $page);
-
-
-		/*
 			<script></script>
 		*/
 		// Custom JavaScript is not allowed.
-		$page = preg_replace('/<script\b[^>]*>.*<\/script>/isU', '', $page);
+		$page = preg_replace_callback('/(<amp-animation\b[^>]*>[\s\t\r\n]*)??<script\b[^>]*>.*<\/script>([\s\t\r\n]*<\/amp-animation>)??/isU', array($this, 'script_callback'), $page);
+
+
+		/*
+			<style></style>
+		*/
+		// The mandatory attribute 'amp-custom' is missing in tag 'style amp-custom'.
+		$page = preg_replace_callback('/(<noscript>[\s\t\r\n]*)??<style\b[^>]*>(.*)<\/style>([\s\t\r\n]*<\/noscript>)??/isU', array($this, 'internal_css_callback'), $page);
 
 
 		/*
 			<a></a>
 		*/
-		$page = preg_replace_callback('/<a\b([^>]*) href=(("([^"]*)")|(\'([^\']*)\'))([^>]*)\s*?>/iU', array($this, 'a_callback'), $page);
+		$page = preg_replace_callback('/<a\b([^>]*) href=(("([^"]*)")|(\'([^\']*)\'))([^>]*)\s*?>/iU', array($this, 'href_callback'), $page);
 
 
 		/*
@@ -666,7 +692,7 @@ class PWAMPTranscoding
 			<video></video>
 		*/
 		// The tag 'video' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-video'?
-		$page = preg_replace_callback('/<video\b([^>]*)\s*?\/?>/iU', array($this, 'video_callback'), $page);
+		$page = preg_replace_callback('/<video\b([^>]*)\s*?>(.*)<\/video>/isU', array($this, 'video_callback'), $page);
 
 
 		/*
@@ -709,6 +735,13 @@ class PWAMPTranscoding
 		}
 
 		$this->head .= "\n" . '<link' . $matches[1] . ' rel=' . $matches[2] . $matches[17] . ' />';
+
+		return '';
+	}
+
+	private function link2_callback($matches)
+	{
+		$this->head .= '<link' . $matches[1] . ' rel=' . $matches[2] . $matches[5] . ' />'. "\n";
 
 		return '';
 	}
@@ -782,10 +815,34 @@ class PWAMPTranscoding
 
 		$page = preg_replace_callback('/<link\b([^>]*) rel=(("((preconnect)|(dns-prefetch)|(preload)|(prerender)|(prefetch))")|(\'((preconnect)|(dns-prefetch)|(preload)|(prerender)|(prefetch))\'))([^>]*)\s*?\/?>/iU', array($this, 'link_callback'), $page);
 
+		// The tag 'amp-accordion' requires including the 'amp-accordion' extension JavaScript.
+		if ( preg_match('/<amp-accordion\b[^>]*>/i', $page) )
+		{
+			$this->head .= "\n" . '<script async custom-element="amp-accordion" src="https://cdn.ampproject.org/v0/amp-accordion-0.1.js"></script>';
+		}
+
+		// The tag 'amp-analytics' requires including the 'amp-analytics' extension JavaScript.
+		if ( preg_match('/<amp-analytics\b[^>]*>/i', $page) )
+		{
+			$this->head .= "\n" . '<script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>';
+		}
+
+		// The tag 'amp-animation' requires including the 'amp-animation' extension JavaScript.
+		if ( preg_match('/<amp-animation\b[^>]*>/i', $page) )
+		{
+			$this->head .= "\n" . '<script async custom-element="amp-animation" src="https://cdn.ampproject.org/v0/amp-animation-0.1.js"></script>';
+		}
+
 		// The tag 'amp-audio' requires including the 'amp-audio' extension JavaScript.
 		if ( preg_match('/<amp-audio\b[^>]*>/i', $page) )
 		{
 			$this->head .= "\n" . '<script async custom-element="amp-audio" src="https://cdn.ampproject.org/v0/amp-audio-0.1.js"></script>';
+		}
+
+		// The tag 'amp-state' requires including the 'amp-bind' extension JavaScript.
+		if ( preg_match('/<amp-sidebar\b[^>]*>/i', $page) || preg_match('/<amp-state\b[^>]*>/i', $page) )
+		{
+			$this->head .= "\n" . '<script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>';
 		}
 
 		// The tag 'amp-carousel' requires including the 'amp-carousel' extension JavaScript.
@@ -813,17 +870,22 @@ class PWAMPTranscoding
 			$this->head .= "\n" . '<script async custom-element="amp-install-serviceworker" src="https://cdn.ampproject.org/v0/amp-install-serviceworker-0.1.js"></script>';
 		}
 
+		// The tag 'template' requires including the 'amp-mustache' extension JavaScript.
+		if ( preg_match('/<template type="amp-mustache">/i', $page) || preg_match('/<script type="text\/plain" template="amp-mustache">/i', $page) )
+		{
+			$this->head .= "\n" . '<script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>';
+		}
+
+		// The tag 'amp-position-observer' requires including the 'amp-position-observer' extension JavaScript.
+		if ( preg_match('/<amp-position-observer\b[^>]*>/i', $page) )
+		{
+			$this->head .= "\n" . '<script async custom-element="amp-position-observer" src="https://cdn.ampproject.org/v0/amp-position-observer-0.1.js"></script>';
+		}
+
 		// The tag 'amp-sidebar' requires including the 'amp-sidebar' extension JavaScript.
 		if ( preg_match('/<amp-sidebar\b[^>]*>/i', $page) )
 		{
 			$this->head .= "\n" . '<script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-0.1.js"></script>';
-			$this->head .= "\n" . '<script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>';
-		}
-
-		// The tag 'amp-state' requires including the 'amp-bind' extension JavaScript.
-		if ( preg_match('/<amp-state\b[^>]*>/i', $page) )
-		{
-			$this->head .= "\n" . '<script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>';
 		}
 
 		// The tag 'amp-video' requires including the 'amp-video' extension JavaScript.
@@ -843,6 +905,9 @@ class PWAMPTranscoding
 
 
 		$this->head = '';
+
+		// The parent tag of tag 'link rel=stylesheet for fonts' is 'body', but it can only be 'head'.
+		$page = preg_replace_callback('/<link\b([^>]*) rel=(("stylesheet")|(\'stylesheet\'))([^>]*)\s*?\/?>/iU', array($this, 'link2_callback'), $page);
 
 		// The mandatory tag 'link rel=canonical' is missing or incorrect.
 		$this->head .= '<link rel="canonical" href="' . $this->canonical . '" />';

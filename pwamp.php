@@ -3,7 +3,7 @@
 Plugin Name: PWA+AMP
 Plugin URI:  https://flexplat.com
 Description: Converts WordPress into Progressive Web Apps and Accelerated Mobile Pages styles.
-Version:     5.8.0
+Version:     5.9.0
 Author:      Rickey Gu
 Author URI:  https://flexplat.com
 Text Domain: pwamp
@@ -61,21 +61,21 @@ class PWAMP
 
 	private function init()
 	{
-		$this->home_url = home_url();
+		$home_url = home_url();
+		$this->home_url = preg_replace('/^https?:\/\//im', 'https://', $home_url);
 		$this->theme = get_option('template');
 		$this->plugins = get_option('active_plugins');
 
 		$parts = parse_url($this->home_url);
-		$this->page_url = $parts['scheme'] . '://' . $parts['host'] . remove_query_arg(array('amp', '__amp_source_origin'));
+		$this->page_url = $parts['scheme'] . '://' . $parts['host'] . remove_query_arg(array('pwamp', '__amp_source_origin'));
 		$this->permalink = get_option('permalink_structure');
 		$this->plugin_dir_url = plugin_dir_url(__FILE__);
 
-		$this->amphtml = add_query_arg(array('amp' => ''), $this->page_url);
+		$this->amphtml = add_query_arg(array('pwamp' => ''), $this->page_url);
 		$this->canonical = $this->page_url;
 
-		$home_url_pattern = preg_replace('/^https?:\/\//im', 'https?://', $this->home_url);
-		$this->home_url_pattern = str_replace(array('/', '.'), array('\/', '\.'), $home_url_pattern);
-		$this->host_url = preg_replace('/^https?:\/\/([^\/]*?)\/??.*$/imU', 'https://${1}', $this->home_url);
+		$this->home_url_pattern = str_replace(array('/', '.'), array('\/', '\.'), $this->home_url);
+		$this->host_url = preg_replace('/^(https:\/\/.+)\/.*$/imU', '${1}', $this->home_url);
 
 		$this->plugin_dir = preg_replace('/^' . $this->home_url_pattern . '(.+)\/$/im', '${1}', $this->plugin_dir_url);
 		$this->plugin_dir_path = plugin_dir_path(__FILE__);
@@ -87,8 +87,11 @@ class PWAMP
 	{
 		if ( preg_match('/^' . $this->home_url_pattern . '\/\??manifest\.webmanifest$/im', $this->page_url) )
 		{
+			$name = get_bloginfo('name');
+			$description = get_bloginfo('description');
+
 			header('Content-Type: application/x-web-app-manifest+json', true);
-			echo '{"name":"' . get_bloginfo('name') . ' &#8211; ' . get_bloginfo('description') . '","short_name":"' . get_bloginfo('name') . '","start_url":"' . $this->home_url . '/?amp","icons":[{"src":".' . $this->plugin_dir . ( is_plugin_active('pwamp-extension/pwamp.php') && file_exists($this->plugin_dir_path . '../pwamp-extension/pwamp/manifest/mf-logo-192.png') ? '-extension' :'' ) . '/pwamp/manifest/mf-logo-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},{"src":".' . $this->plugin_dir . ( is_plugin_active('pwamp-extension/pwamp.php') && file_exists($this->plugin_dir_path . '../pwamp-extension/pwamp/manifest/mf-logo-512.png') ? '-extension' :'' ) . '/pwamp/manifest/mf-logo-512.png","sizes":"512x512","type":"image/png"}],"theme_color":"#ffffff","background_color":"#ffffff","display":"standalone"}';
+			echo '{"name":"' . $name . ( !empty($description) ? (' -- ' . $description) : '' ) . '","short_name":"' . $name . '","start_url":"' . $this->home_url . '/?pwamp","icons":[{"src":".' . $this->plugin_dir . ( is_plugin_active('pwamp-extension/pwamp.php') && file_exists($this->plugin_dir_path . '../pwamp-extension/pwamp/manifest/mf-logo-192.png') ? '-extension' :'' ) . '/pwamp/manifest/mf-logo-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},{"src":".' . $this->plugin_dir . ( is_plugin_active('pwamp-extension/pwamp.php') && file_exists($this->plugin_dir_path . '../pwamp-extension/pwamp/manifest/mf-logo-512.png') ? '-extension' :'' ) . '/pwamp/manifest/mf-logo-512.png","sizes":"512x512","type":"image/png"}],"theme_color":"#ffffff","background_color":"#ffffff","display":"standalone"}';
 
 			exit();
 		}
@@ -122,7 +125,7 @@ class PWAMP
 			echo 'importScripts(\'.' . $this->plugin_dir . '/pwamp/serviceworker/sw-toolbox.js\');
 toolbox.router.any(/\/wp-admin\/|\/wp-json\//, toolbox.networkOnly);
 toolbox.router.any(/\/admin-ajax\.php|\/wp-activate\.php|\/wp-cron\.php|\/wp-login\.php|\/wp-signup\.php/, toolbox.networkOnly);
-toolbox.router.any(/&(amp;)?preview=true$/, toolbox.networkOnly);
+toolbox.router.any(/&(pwamp;)?preview=true$/, toolbox.networkOnly);
 toolbox.router.default = toolbox.cacheFirst;';
 
 			exit();
@@ -140,6 +143,17 @@ toolbox.router.default = toolbox.cacheFirst;';
 </script>' . "\n";
 	}
 
+	private function echo_redirection()
+	{
+		require_once $this->plugin_dir_path . '../pwamp-redirection/pwamp/redirection.php';
+
+		$redirection = new PWAMPRedirection();
+
+		$page_path = preg_replace('/^' . $this->home_url_pattern . '(.+)$/im', '${1}', $this->page_url);
+
+		$redirection->echo_redirection($page_path, $this->home_url);
+	}
+
 	private function get_external_canonical()
 	{
 		require_once $this->plugin_dir_path . '../pwamp-canonical/pwamp/canonical.php';
@@ -152,6 +166,7 @@ toolbox.router.default = toolbox.cacheFirst;';
 
 		return $canonical;
 	}
+
 
 	private function get_page_type()
 	{
@@ -274,9 +289,13 @@ toolbox.router.default = toolbox.cacheFirst;';
 			$base_url = $this->home_url . '/';
 		}
 
-		if ( preg_match('/^https?:\/\//im', $url) )
+		if ( preg_match('/^https?:\/\/127\.0\.0\.1\/.+\//imU', $url) )
 		{
-			$url = preg_replace('/^http:\/\//im', 'https://', $url);
+			$url = preg_replace('/^https?:\/\/127\.0\.0\.1\/.+\//imU', $this->home_url . '/', $url);
+		}
+		elseif ( preg_match('/^https?:\/\//im', $url) )
+		{
+			$url = preg_replace('/^https?:\/\//im', 'https://', $url);
 		}
 		elseif ( preg_match('/^\/\//im', $url) )
 		{
@@ -383,7 +402,7 @@ toolbox.router.default = toolbox.cacheFirst;';
 		}
 		$url = !empty($match2[2]) ? $match2[3] : $match2[5];
 
-		$host = preg_replace('/^https?:\/\/([^\/]+)\/.*$/im', '${1}', $url);
+		$host = preg_replace('/^https?:\/\/(.+)\/.*$/imU', '${1}', $url);
 		if ( in_array($host, $this->font_server_list) )
 		{
 			return '<link' . $match . ' />';
@@ -392,6 +411,7 @@ toolbox.router.default = toolbox.cacheFirst;';
 
 		require_once $this->plugin_dir_path . 'pwamp/lib/get-remote-file-content.php';
 
+		$url = $this->update_url($url);
 		$css = get_remote_data($url);
 
 		$this->base_url = $url;
@@ -589,7 +609,7 @@ toolbox.router.default = toolbox.cacheFirst;';
 		$this->divert();
 
 
-		if ( isset($_GET['amp']) )
+		if ( isset($_GET['pwamp']) )
 		{
 			$device = 'mobile';
 		}
@@ -611,9 +631,9 @@ toolbox.router.default = toolbox.cacheFirst;';
 		}
 
 
-		if ( !function_exists('is_amp_endpoint') )
+		if ( is_plugin_active('pwamp-redirection/pwamp.php') )
 		{
-			require_once $this->plugin_dir_path . 'pwamp/lib/amp.php';
+			$this->echo_redirection();
 		}
 
 		if ( is_plugin_active('pwamp-canonical/pwamp.php') )
@@ -640,6 +660,12 @@ toolbox.router.default = toolbox.cacheFirst;';
 		add_filter('wp_die_json_handler', array($this, 'wp_die_json_handler'), 10, 1);
 
 		add_filter('show_admin_bar', '__return_false');
+
+
+		if ( !function_exists('is_amp_endpoint') )
+		{
+			require_once $this->plugin_dir_path . 'pwamp/lib/amp.php';
+		}
 	}
 }
 
