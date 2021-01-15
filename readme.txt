@@ -5,7 +5,7 @@ Tags: wordpress, amp, plugin, google, theme, pwa, accelerated mobile pages, prog
 Requires at least: 4.7
 Tested up to: 5.6
 Requires PHP: 5.2.4
-Stable tag: 5.9.0
+Stable tag: 5.10.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,10 @@ I use Chrome Lighthouse Extension: https://chrome.google.com/webstore/detail/lig
 You can Google to find the solution, for example, this one: https://www.howtogeek.com/196087/how-to-add-websites-to-the-home-screen-on-any-smartphone-or-tablet/ .
 
 == Changelog ==
+
+= 5.10.0 =
+(Fri., Jan. 15, 2021)
+* compatible with WooCommerce
 
 = 5.9.0 =
 (Tue., Jan. 05, 2021)

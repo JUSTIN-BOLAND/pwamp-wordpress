@@ -683,6 +683,13 @@ class PWAMPTranscoding
 
 
 		/*
+			<select></select>
+		*/
+		// The attribute 'autocomplete' may not appear in tag 'select'.
+		$page = preg_replace('/<select\b([^>]*) autocomplete=(("[^"]*")|(\'[^\']*\'))([^>]*)\s*?>/iU', '<select${1}${5}>', $page);
+
+
+		/*
 			<title></title>
 		*/
 		$page = preg_replace('/^[\s\t]*<title>(.*)<\/title>/im', '<title>${1}</title>', $page, 1);

@@ -3,7 +3,7 @@
 Plugin Name: PWA+AMP
 Plugin URI:  https://flexplat.com
 Description: Converts WordPress into Progressive Web Apps and Accelerated Mobile Pages styles.
-Version:     5.9.0
+Version:     5.10.0
 Author:      Rickey Gu
 Author URI:  https://flexplat.com
 Text Domain: pwamp
@@ -133,15 +133,50 @@ toolbox.router.default = toolbox.cacheFirst;';
 	}
 
 
-	public function add_amphtml()
+	private function transcode_page_desktop($page)
 	{
-		echo '<link rel="amphtml" href="' . $this->amphtml . '" />
+		$head = '<link rel="amphtml" href="' . $this->amphtml . '" />
 <script type="text/javascript">
 	if ( screen.width <= 768 || screen.height <= 576 ) {
 		window.location = "' . $this->amphtml . '";
 	}
 </script>' . "\n";
+		$page = preg_replace('/<\/head>/i', $head . "\n" . '</head>', $page, 1);
+
+		return $page;
 	}
+
+	private function catch_page_callback_desktop($page)
+	{
+		if ( empty($page) )
+		{
+			return;
+		}
+
+		if ( preg_match('/<form\b[^>]* method=(("post")|(\'post\'))[^>]*>/i', $page) )
+		{
+			return $page;
+		}
+
+		$page2 = $this->transcode_page_desktop($page);
+		if ( empty($page2) )
+		{
+			return $page;
+		}
+
+		return $page2;
+	}
+
+	public function after_setup_theme_desktop()
+	{
+		ob_start(array($this, 'catch_page_callback_desktop'));
+	}
+
+	public function shutdown_desktop()
+	{
+		ob_end_flush();
+	}
+
 
 	private function echo_redirection()
 	{
@@ -165,120 +200,6 @@ toolbox.router.default = toolbox.cacheFirst;';
 		$canonical = $external->get_canonical($page_path);
 
 		return $canonical;
-	}
-
-
-	private function get_page_type()
-	{
-		global $wp_query;
-
-		$page_type = '';
-		if ( $wp_query->is_page )
-		{
-			$page_type = is_front_page() ? 'front' : 'page';
-		}
-		elseif ( $wp_query->is_home )
-		{
-			$page_type = 'home';
-		}
-		elseif ( $wp_query->is_single )
-		{
-			$page_type = ( $wp_query->is_attachment ) ? 'attachment' : 'single';
-		}
-		elseif ( $wp_query->is_category )
-		{
-			$page_type = 'category';
-		}
-		elseif ( $wp_query->is_tag )
-		{
-			$page_type = 'tag';
-		}
-		elseif ( $wp_query->is_tax )
-		{
-			$page_type = 'tax';
-		}
-		elseif ( $wp_query->is_archive )
-		{
-			if ( $wp_query->is_day )
-			{
-				$page_type = 'day';
-			}
-			elseif ( $wp_query->is_month )
-			{
-				$page_type = 'month';
-			}
-			elseif ( $wp_query->is_year )
-			{
-				$page_type = 'year';
-			}
-			elseif ( $wp_query->is_author )
-			{
-				$page_type = 'author';
-			}
-			else
-			{
-				$page_type = 'archive';
-			}
-		}
-		elseif ( $wp_query->is_search )
-		{
-			$page_type = 'search';
-		}
-		elseif ( $wp_query->is_404 )
-		{
-			$page_type = 'notfound';
-		}
-
-		return $page_type;
-	}
-
-	private function transcode_page($page)
-	{
-		if ( is_plugin_active('pwamp-online/pwamp.php') )
-		{
-			require_once $this->plugin_dir_path . '../pwamp-online/pwamp/conversion.php';
-		}
-		else
-		{
-			require_once $this->plugin_dir_path . 'pwamp/conversion.php';
-		}
-
-		$conversion = new PWAMPConversion();
-
-
-		$page = preg_replace('/^[\s\t]*<style type="[^"]+" id="[^"]+"><\/style>$/im', '', $page);
-
-		$data = array(
-			'page_url' => $this->page_url,
-			'canonical' => $this->canonical,
-			'permalink' => $this->permalink,
-			'page_type' => $this->get_page_type(),
-			'plugin_dir_url' => $this->plugin_dir_url
-		);
-
-
-		$style = '';
-		$templates = '';
-
-		if ( is_plugin_active('pwamp-extension/pwamp.php') && file_exists($this->plugin_dir_path . '../pwamp-extension/pwamp/cfg/cfg.php') )
-		{
-			require_once $this->plugin_dir_path . '../pwamp-extension/pwamp/cfg/cfg.php';
-
-			if ( defined('PWAMP_STYLE') )
-			{
-				$style = PWAMP_STYLE;
-			}
-
-			if ( defined('PWAMP_TEMPLATES') )
-			{
-				$templates = PWAMP_TEMPLATES;
-			}
-		}
-
-
-		$page = $conversion->convert($page, $this->home_url, $data, $this->theme, $this->plugins, $style, $templates);
-
-		return $page;
 	}
 
 
@@ -455,9 +376,127 @@ toolbox.router.default = toolbox.cacheFirst;';
 	}
 
 
+	private function get_page_type()
+	{
+		global $wp_query;
+
+		$page_type = '';
+		if ( $wp_query->is_page )
+		{
+			$page_type = is_front_page() ? 'front' : 'page';
+		}
+		elseif ( $wp_query->is_home )
+		{
+			$page_type = 'home';
+		}
+		elseif ( $wp_query->is_single )
+		{
+			$page_type = ( $wp_query->is_attachment ) ? 'attachment' : 'single';
+		}
+		elseif ( $wp_query->is_category )
+		{
+			$page_type = 'category';
+		}
+		elseif ( $wp_query->is_tag )
+		{
+			$page_type = 'tag';
+		}
+		elseif ( $wp_query->is_tax )
+		{
+			$page_type = 'tax';
+		}
+		elseif ( $wp_query->is_archive )
+		{
+			if ( $wp_query->is_day )
+			{
+				$page_type = 'day';
+			}
+			elseif ( $wp_query->is_month )
+			{
+				$page_type = 'month';
+			}
+			elseif ( $wp_query->is_year )
+			{
+				$page_type = 'year';
+			}
+			elseif ( $wp_query->is_author )
+			{
+				$page_type = 'author';
+			}
+			else
+			{
+				$page_type = 'archive';
+			}
+		}
+		elseif ( $wp_query->is_search )
+		{
+			$page_type = 'search';
+		}
+		elseif ( $wp_query->is_404 )
+		{
+			$page_type = 'notfound';
+		}
+
+		return $page_type;
+	}
+
+	private function transcode_page($page)
+	{
+		if ( is_plugin_active('pwamp-online/pwamp.php') )
+		{
+			require_once $this->plugin_dir_path . '../pwamp-online/pwamp/conversion.php';
+		}
+		else
+		{
+			require_once $this->plugin_dir_path . 'pwamp/conversion.php';
+		}
+
+		$conversion = new PWAMPConversion();
+
+
+		$page = preg_replace('/^[\s\t]*<style type="[^"]+" id="[^"]+"><\/style>$/im', '', $page);
+
+		$data = array(
+			'page_url' => $this->page_url,
+			'canonical' => $this->canonical,
+			'permalink' => $this->permalink,
+			'page_type' => $this->get_page_type(),
+			'plugin_dir_url' => $this->plugin_dir_url
+		);
+
+
+		$style = '';
+		$templates = '';
+
+		if ( is_plugin_active('pwamp-extension/pwamp.php') && file_exists($this->plugin_dir_path . '../pwamp-extension/pwamp/cfg/cfg.php') )
+		{
+			require_once $this->plugin_dir_path . '../pwamp-extension/pwamp/cfg/cfg.php';
+
+			if ( defined('PWAMP_STYLE') )
+			{
+				$style = PWAMP_STYLE;
+			}
+
+			if ( defined('PWAMP_TEMPLATES') )
+			{
+				$templates = PWAMP_TEMPLATES;
+			}
+		}
+
+
+		$page = $conversion->convert($page, $this->home_url, $data, $this->theme, $this->plugins, $style, $templates);
+
+		return $page;
+	}
+
 	private function catch_page_callback($page)
 	{
 		if ( empty($page) )
+		{
+			return;
+		}
+
+		if ( preg_match('/<form\b[^>]* method=(("post")|(\'post\'))[^>]*>/i', $page) )
 		{
 			return $page;
 		}
@@ -625,7 +664,8 @@ toolbox.router.default = toolbox.cacheFirst;';
 
 		if ( $device == 'desktop' )
 		{
-			add_action('wp_head', array($this, 'add_amphtml'));
+			add_action('after_setup_theme', array($this, 'after_setup_theme_desktop'));
+			add_action('shutdown', array($this, 'shutdown_desktop'));
 
 			return;
 		}
